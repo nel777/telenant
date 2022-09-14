@@ -1,3 +1,4 @@
+// ignore: camel_case_types
 class details {
   String? name;
   String? location;
@@ -5,6 +6,7 @@ class details {
   int? bedrooms;
   PriceRange? priceRange;
   String? contact;
+  String? type;
   String? website;
 
   details(
@@ -14,6 +16,7 @@ class details {
       this.bedrooms,
       this.priceRange,
       this.contact,
+      this.type,
       this.website});
 
   details.fromJson(Map<String, dynamic> json) {
@@ -25,6 +28,7 @@ class details {
         ? PriceRange.fromJson(json['price_range'])
         : null)!;
     contact = json['contact'];
+    type = json['type'];
     website = json['website'];
   }
 
@@ -38,6 +42,7 @@ class details {
       data['price_range'] = priceRange!.toJson();
     }
     data['contact'] = contact;
+    data['type'] = type;
     data['website'] = contact;
     return data;
   }

@@ -1,4 +1,6 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:telenant/authentication/register.dart';
 import 'package:telenant/home/homepage.dart';
 
@@ -12,11 +14,20 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  bool loading = false;
+  String emailValidation = '';
+  String passwordValidation = '';
   @override
   void dispose() {
     _usernameController.dispose();
     _passwordController.dispose();
     super.dispose();
+  }
+
+  void setLoginPersistent(String email) async {
+    print('olahhhh');
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString('userEmail', email);
   }
 
   @override
@@ -53,9 +64,11 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                   TextFormField(
                     controller: _usernameController,
-                    decoration: const InputDecoration(
-                        labelText: 'Username',
-                        border: OutlineInputBorder(
+                    decoration: InputDecoration(
+                        labelText: 'Email',
+                        errorText:
+                            emailValidation == '' ? null : emailValidation,
+                        border: const OutlineInputBorder(
                             borderSide: BorderSide(width: 1.0))),
                   ),
                   const SizedBox(
@@ -63,10 +76,14 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                   TextFormField(
                     controller: _passwordController,
+                    obscureText: true,
                     decoration: InputDecoration(
                         filled: true,
                         fillColor: Colors.white.withOpacity(0.5),
                         labelText: 'Password',
+                        errorText: passwordValidation == ''
+                            ? null
+                            : passwordValidation,
                         helperText: 'Enter password maximum of 6 characters',
                         hintStyle: const TextStyle(color: Colors.black87),
                         border: const OutlineInputBorder(
@@ -78,11 +95,72 @@ class _LoginPageState extends State<LoginPage> {
                   ElevatedButton(
                       style: ElevatedButton.styleFrom(
                           fixedSize: const Size(double.maxFinite, 40)),
-                      onPressed: () {
-                        Navigator.of(context).pushReplacement(MaterialPageRoute(
-                            builder: ((context) => const HomePage())));
+                      onPressed: () async {
+                        setState(() {
+                          loading = true;
+                        });
+                        if (_usernameController.text.isEmpty ||
+                            _passwordController.text.isEmpty) {
+                          setState(() {
+                            loading = false;
+                            emailValidation = 'Email cannot be empty';
+                            passwordValidation = 'Password cannot be empty';
+                          });
+                        } else {
+                          setState(() {
+                            emailValidation = '';
+                            passwordValidation = '';
+                          });
+                          try {
+                            final credential = await FirebaseAuth.instance
+                                .signInWithEmailAndPassword(
+                                    email: _usernameController.text,
+                                    password: _passwordController.text)
+                                .then((value) async {
+                              if (value.user != null) {
+                                setLoginPersistent(
+                                    value.user!.email.toString());
+                                Navigator.of(context).pushReplacement(
+                                    MaterialPageRoute(
+                                        builder: ((context) =>
+                                            const HomePage())));
+                              }
+                              setState(() {
+                                loading = false;
+                              });
+                            });
+                          } on FirebaseAuthException catch (e) {
+                            if (e.code == 'user-not-found') {
+                              print('No user found for that email.');
+                              setState(() {
+                                emailValidation =
+                                    'No user found for that email.';
+                              });
+                              setState(() {
+                                loading = false;
+                              });
+                            } else if (e.code == 'wrong-password') {
+                              setState(() {
+                                emailValidation = '';
+                                passwordValidation = 'Wrong-password';
+                              });
+                              setState(() {
+                                loading = false;
+                              });
+                              print('Wrong password provided for that user.');
+                            }
+                          }
+                        }
                       },
-                      child: const Text('Login')),
+                      child: loading
+                          ? const SizedBox(
+                              height: 25,
+                              width: 25,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                              ),
+                            )
+                          : const Text('Login')),
                   // const SizedBox(
                   //   height: 50,
                   // ),
