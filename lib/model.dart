@@ -5,6 +5,7 @@ class details {
   String? coverPage;
   int? bedrooms;
   PriceRange? priceRange;
+  List<dynamic>? gallery;
   String? contact;
   String? type;
   String? website;
@@ -15,6 +16,7 @@ class details {
       this.coverPage,
       this.bedrooms,
       this.priceRange,
+      this.gallery,
       this.contact,
       this.type,
       this.website});
@@ -27,6 +29,7 @@ class details {
     priceRange = (json['price_range'] != null
         ? PriceRange.fromJson(json['price_range'])
         : null)!;
+    gallery = json['gallery'];
     contact = json['contact'];
     type = json['type'];
     website = json['website'];
@@ -41,6 +44,7 @@ class details {
     if (priceRange != null) {
       data['price_range'] = priceRange!.toJson();
     }
+    data['gallery'] = gallery;
     data['contact'] = contact;
     data['type'] = type;
     data['website'] = contact;

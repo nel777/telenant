@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:telenant/FirebaseServices/readitems.dart';
 import 'package:telenant/authentication/login.dart';
 import 'package:telenant/home/filtered.dart';
+import 'package:telenant/home/searchbox.dart';
 import 'package:textfield_search/textfield_search.dart';
 
 class HomePage extends StatefulWidget {
@@ -15,7 +16,9 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final String _selectedValue = 'Near Town';
+  String _selectedValue = 'Near Town';
+  int min = 200;
+  int max = 10000;
   List propertyTypes = [];
   List<String> listOfPriceValue = [
     '200',
@@ -146,6 +149,9 @@ class _HomePageState extends State<HomePage> {
                             }).toList(),
                             onChanged: (value) {
                               print(value);
+                              setState(() {
+                                _selectedValue = value.toString();
+                              });
                             }),
 
                         const SizedBox(
@@ -172,8 +178,8 @@ class _HomePageState extends State<HomePage> {
                                   propertyType(Icons.apartment, 'Apartment'),
                                   propertyType(Icons.house, 'Townhouse'),
                                   propertyType(Icons.hotel, 'Hotel'),
-                                  propertyType(
-                                      Icons.view_timeline_rounded, 'Any'),
+                                  // propertyType(
+                                  //     Icons.view_timeline_rounded, 'Any'),
                                 ],
                               ),
                             )
@@ -257,7 +263,11 @@ class _HomePageState extends State<HomePage> {
                                             ),
                                           );
                                         }).toList(),
-                                        onChanged: (value) {}),
+                                        onChanged: (value) {
+                                          setState(() {
+                                            min = int.parse(value.toString());
+                                          });
+                                        }),
                                   ),
                                   const Padding(
                                     padding:
@@ -323,7 +333,11 @@ class _HomePageState extends State<HomePage> {
                                             ),
                                           );
                                         }).toList(),
-                                        onChanged: (value) {}),
+                                        onChanged: (value) {
+                                          setState(() {
+                                            max = int.parse(value.toString());
+                                          });
+                                        }),
                                   ),
                                 ],
                               ),
@@ -365,20 +379,32 @@ class _HomePageState extends State<HomePage> {
                         const SizedBox(
                           height: 5,
                         ),
-                        TextFieldSearch(
-                          label: 'Search',
-                          // minStringLength: -1,
-                          controller: searchController,
-                          initialList: listOfTransient,
-                          decoration: const InputDecoration(
-                              contentPadding: EdgeInsets.all(15),
-                              hintText: 'type in the transient name',
-                              hintStyle: TextStyle(
-                                color: Colors.black,
-                                fontSize: 18,
-                                fontStyle: FontStyle.italic,
-                              ),
-                              border: OutlineInputBorder()),
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.of(context).push(MaterialPageRoute(
+                                builder: ((context) => Material(
+                                      child: SearchDemo(
+                                        data: listOfTransient,
+                                      ),
+                                    ))));
+                          },
+                          child: TextFieldSearch(
+                            label: 'Search',
+
+                            // minStringLength: -1,
+                            controller: searchController,
+                            initialList: listOfTransient,
+                            decoration: const InputDecoration(
+                                enabled: false,
+                                contentPadding: EdgeInsets.all(15),
+                                hintText: 'type in the transient name',
+                                hintStyle: TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 18,
+                                  fontStyle: FontStyle.italic,
+                                ),
+                                border: OutlineInputBorder()),
+                          ),
                         ),
                         // TextField(
                         //   controller: searchController,
@@ -399,11 +425,27 @@ class _HomePageState extends State<HomePage> {
                             style: ElevatedButton.styleFrom(
                                 fixedSize: const Size(double.maxFinite, 40)),
                             onPressed: () {
+                              Map<String, int> pricerange = {
+                                'min': min,
+                                'max': max,
+                              };
+                              Map<String, dynamic> filtered = {
+                                'type': propertyTypes,
+                                'location': _selectedValue,
+                                'price': pricerange
+                              };
+                              //print(filtered['price']['min']);
+                              //filtered.add(propertyTypes);
                               Navigator.of(context).push(MaterialPageRoute(
-                                  builder: ((context) =>
-                                      const ShowFiltered())));
+                                  builder: ((context) => ShowFiltered(
+                                        filtered: filtered,
+                                      ))));
+                              // print(propertyTypes);
+                              // print(_selectedValue);
+                              // print(min);
+                              // print(max);
                             },
-                            child: const Text('Proceed'))
+                            child: const Text('Proceed')),
                       ],
                     ),
                   );
@@ -453,10 +495,6 @@ class _HomePageState extends State<HomePage> {
                 if (propertyTypes.contains(type)) {
                   setState(() {
                     propertyTypes.remove(type);
-                  });
-                } else {
-                  setState(() {
-                    propertyTypes.add(type);
                   });
                 }
               }

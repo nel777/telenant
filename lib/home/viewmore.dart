@@ -1,7 +1,8 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
-import 'package:telenant/home/chat.dart';
 import 'package:telenant/model.dart';
+
+import '../chatmessaging/chatscreen.dart';
 
 class ViewMore extends StatefulWidget {
   final details detail;
@@ -12,12 +13,12 @@ class ViewMore extends StatefulWidget {
 }
 
 class _ViewMoreState extends State<ViewMore> {
-  final List<String> imageList = [
-    'https://visita-storage-staging.s3.ap-southeast-1.amazonaws.com/31/IMG_20220324_212353.jpg',
-    'https://visita-storage-staging.s3.ap-southeast-1.amazonaws.com/30/IMG_20220324_212329.jpg',
-    'https://visita-storage-staging.s3.ap-southeast-1.amazonaws.com/32/IMG_20220324_212508.jpg',
-    'https://visita-storage-staging.s3.ap-southeast-1.amazonaws.com/33/IMG_20220324_212535.jpg'
-  ];
+  // final List<String> imageList = [
+  //   'https://visita-storage-staging.s3.ap-southeast-1.amazonaws.com/31/IMG_20220324_212353.jpg',
+  //   'https://visita-storage-staging.s3.ap-southeast-1.amazonaws.com/30/IMG_20220324_212329.jpg',
+  //   'https://visita-storage-staging.s3.ap-southeast-1.amazonaws.com/32/IMG_20220324_212508.jpg',
+  //   'https://visita-storage-staging.s3.ap-southeast-1.amazonaws.com/33/IMG_20220324_212535.jpg'
+  // ];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -127,7 +128,7 @@ class _ViewMoreState extends State<ViewMore> {
                           width: 300,
                           margin: const EdgeInsets.all(15),
                           child: CarouselSlider.builder(
-                            itemCount: imageList.length,
+                            itemCount: widget.detail.gallery!.length,
                             options: CarouselOptions(
                               enlargeCenterPage: true,
                               height: 350,
@@ -149,7 +150,7 @@ class _ViewMoreState extends State<ViewMore> {
                                   child: ClipRRect(
                                     borderRadius: BorderRadius.circular(15),
                                     child: Image.network(
-                                      imageList[i],
+                                      widget.detail.gallery![i],
                                       width: 500,
                                       fit: BoxFit.cover,
                                       loadingBuilder: (BuildContext context,
@@ -175,7 +176,7 @@ class _ViewMoreState extends State<ViewMore> {
                                   ),
                                 ),
                                 onTap: () {
-                                  var url = imageList[i];
+                                  var url = widget.detail.gallery![i];
                                   print(url.toString());
                                 },
                               );
@@ -195,7 +196,8 @@ class _ViewMoreState extends State<ViewMore> {
                           child: ElevatedButton.icon(
                               onPressed: () {
                                 Navigator.of(context).push(MaterialPageRoute(
-                                    builder: ((context) => const ChatOwner())));
+                                    builder: ((context) =>
+                                        const ChatScreen())));
                               },
                               style: ElevatedButton.styleFrom(
                                   // /backgroundColor: Colors.,
