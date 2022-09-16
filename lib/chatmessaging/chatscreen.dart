@@ -1,10 +1,15 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:telenant/FirebaseServices/services.dart';
 
+import '../models/chatmodel.dart';
+import '../models/model.dart';
 import 'chatmessage.dart';
 
 class ChatScreen extends StatefulWidget {
-  const ChatScreen({Key? key}) : super(key: key);
+  final details transient;
+  const ChatScreen({Key? key, required this.transient}) : super(key: key);
 
   @override
   ChatScreenState createState() => ChatScreenState();
@@ -12,54 +17,74 @@ class ChatScreen extends StatefulWidget {
 
 class ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   final _textController = TextEditingController();
-  final List<ChatMessage> messages = [];
+
   bool isComposing = false;
   User? user = FirebaseAuth.instance.currentUser;
 
-  void _onSubmitted(String text) {
-    _textController.clear();
+  // void _onSubmitted(String text) {
+  //   _textController.clear();
 
-    var message = ChatMessage(
-        text: text,
-        myname: user!.displayName.toString(),
-        animationController: AnimationController(
-            duration: const Duration(milliseconds: 500), vsync: this));
-    setState(() {
-      messages.insert(messages.length, message);
-      isComposing = false;
-    });
-    message.animationController.forward();
-  }
+  //   var message = ChatMessage(
+  //       text: text,
+  //       myname: user!.email.toString(),
+  //       animationController: AnimationController(
+  //           duration: const Duration(milliseconds: 500), vsync: this));
+  //   setState(() {
+  //     messages.insert(messages.length, message);
+  //     isComposing = false;
+  //   });
+  //   message.animationController.forward();
+  // }
 
   @override
   void dispose() {
-    for (var message in messages) {
-      message.animationController.dispose();
-    }
+    //message.animationController.dispose();
     super.dispose();
   }
 
   Widget _layoutTextField() {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Chat Here"),
+        title: const Text("Contact Owner"),
       ),
-      body: Column(
-        children: [
-          Flexible(
-              child: ListView.builder(
-            itemBuilder: (_, index) {
-              return messages[index];
-            },
-            itemCount: messages.length,
-            padding: const EdgeInsets.all(8),
-          )),
-          const Divider(
-            height: 7,
-          ),
-          _buildTextField()
-        ],
-      ),
+      body: StreamBuilder<QuerySnapshot>(
+          stream: FirebaseFirestoreService.instance.retrieveChatMessages(
+              widget.transient.name.toString(), user!.email.toString()),
+          builder: ((context, snapshot) {
+            final List<ChatMessage> messages = [];
+            if (snapshot.hasData) {
+              for (final thismessage in snapshot.data!.docs) {
+                var message = ChatMessage(
+                    email: user!.email.toString(),
+                    text: thismessage['message'],
+                    myname: thismessage['from'],
+                    animationController: AnimationController(
+                        duration: const Duration(milliseconds: 500),
+                        vsync: this));
+                messages.insert(messages.length, message);
+                message.animationController.forward();
+              }
+            }
+            return Column(
+              children: [
+                Flexible(
+                  child: ListView.builder(
+                    //shrinkWrap: true,
+                    itemBuilder: (_, index) {
+                      return messages[index];
+                    },
+                    itemCount: messages.length,
+                    padding: const EdgeInsets.all(8),
+                  ),
+                ),
+                //const Spacer(),
+                const Divider(
+                  height: 7,
+                ),
+                _buildTextField()
+              ],
+            );
+          })),
     );
   }
 
@@ -73,20 +98,6 @@ class ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
             Flexible(
               child: TextFormField(
                 controller: _textController,
-                onFieldSubmitted: (text) {
-                  if (isComposing) {
-                    _onSubmitted(text);
-                  }
-                },
-                onChanged: (text) {
-                  setState(() {
-                    if (text.isNotEmpty) {
-                      isComposing = true;
-                    } else {
-                      isComposing = false;
-                    }
-                  });
-                },
                 textInputAction: TextInputAction.done,
                 decoration:
                     const InputDecoration.collapsed(hintText: "Send a message"),
@@ -94,11 +105,25 @@ class ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
             ),
             IconButton(
               icon: const Icon(Icons.send),
-              onPressed: !isComposing
-                  ? null
-                  : () {
-                      _onSubmitted(_textController.text);
-                    },
+              onPressed: () {
+                if (_textController.text.isEmpty) {
+                } else {
+                  try {
+                    FirebaseFirestoreService.instance.sendChatMessages(
+                        widget.transient.name.toString(),
+                        user!.email.toString(),
+                        MessageModel(
+                          to: widget.transient.name.toString(),
+                          from: user!.email.toString(),
+                          message: _textController.text,
+                          timepressed: Timestamp.now(),
+                        ));
+                    _textController.clear();
+                  } on FirebaseException catch (ex) {
+                    throw ex.message.toString();
+                  }
+                }
+              },
             )
           ],
         ),

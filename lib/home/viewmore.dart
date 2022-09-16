@@ -1,6 +1,6 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
-import 'package:telenant/model.dart';
+import 'package:telenant/models/model.dart';
 
 import '../chatmessaging/chatscreen.dart';
 
@@ -196,8 +196,9 @@ class _ViewMoreState extends State<ViewMore> {
                           child: ElevatedButton.icon(
                               onPressed: () {
                                 Navigator.of(context).push(MaterialPageRoute(
-                                    builder: ((context) =>
-                                        const ChatScreen())));
+                                    builder: ((context) => ChatScreen(
+                                          transient: widget.detail,
+                                        ))));
                               },
                               style: ElevatedButton.styleFrom(
                                   // /backgroundColor: Colors.,

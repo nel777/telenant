@@ -1,9 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:telenant/FirebaseServices/readitems.dart';
+import 'package:telenant/FirebaseServices/services.dart';
 import 'package:telenant/home/viewmore.dart';
 
-import '../model.dart';
+import '../models/model.dart';
 
 class ShowFiltered extends StatefulWidget {
   final Map<String, dynamic> filtered;

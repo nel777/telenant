@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:telenant/FirebaseServices/readitems.dart';
+import 'package:telenant/FirebaseServices/services.dart';
 import 'package:telenant/home/viewmore.dart';
-import 'package:telenant/model.dart';
+import 'package:telenant/models/model.dart';
 
 class SearchDemo extends StatefulWidget {
   final List<String> data;

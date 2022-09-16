@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:telenant/authentication/register.dart';
+import 'package:telenant/home/admin/admincreate.dart';
 import 'package:telenant/home/homepage.dart';
 
 class LoginPage extends StatefulWidget {
@@ -120,10 +121,18 @@ class _LoginPageState extends State<LoginPage> {
                               if (value.user != null) {
                                 setLoginPersistent(
                                     value.user!.email.toString());
-                                Navigator.of(context).pushReplacement(
-                                    MaterialPageRoute(
-                                        builder: ((context) =>
-                                            const HomePage())));
+                                if (_usernameController.text
+                                    .contains('telenant.admin.com')) {
+                                  Navigator.of(context).pushReplacement(
+                                      MaterialPageRoute(
+                                          builder: ((context) =>
+                                              const AdminHomeView())));
+                                } else {
+                                  Navigator.of(context).pushReplacement(
+                                      MaterialPageRoute(
+                                          builder: ((context) =>
+                                              const HomePage())));
+                                }
                               }
                               setState(() {
                                 loading = false;

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 class ChatMessage extends StatelessWidget {
   final String text;
+  final String email;
   final AnimationController animationController;
   final String myname;
 
@@ -9,7 +10,8 @@ class ChatMessage extends StatelessWidget {
       {Key? key,
       required this.text,
       required this.animationController,
-      required this.myname})
+      required this.myname,
+      required this.email})
       : super(key: key);
 
   @override
@@ -20,25 +22,39 @@ class ChatMessage extends StatelessWidget {
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 10),
         child: Row(
+          mainAxisAlignment:
+              email == myname ? MainAxisAlignment.end : MainAxisAlignment.start,
           children: [
-            Container(
-              child: CircleAvatar(
-                child: Text(myname[0].toUpperCase() + myname[1].toUpperCase()),
+            email == myname
+                ? const SizedBox.shrink()
+                : Container(
+                    margin: const EdgeInsets.only(right: 16),
+                    child: CircleAvatar(
+                      child: Text(
+                          myname[0].toUpperCase() + myname[1].toUpperCase()),
+                    ),
+                  ),
+            Flexible(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    email == myname ? 'You' : myname,
+                    textAlign: TextAlign.end,
+                    style: const TextStyle(
+                        fontSize: 16, fontWeight: FontWeight.w300),
+                  ),
+                  Container(
+                    margin: const EdgeInsets.only(top: 5),
+                    child: Text(
+                      text,
+                      overflow: TextOverflow.visible,
+                      softWrap: true,
+                      style: const TextStyle(fontSize: 17),
+                    ),
+                  ),
+                ],
               ),
-              margin: const EdgeInsets.only(right: 16),
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  myname,
-                  style: Theme.of(context).textTheme.headline4,
-                ),
-                Container(
-                  child: Text(text),
-                  margin: const EdgeInsets.only(top: 5),
-                )
-              ],
             )
           ],
         ),
