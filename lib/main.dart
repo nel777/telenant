@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:telenant/home/admin/admincreate.dart';
 import 'package:telenant/home/homepage.dart';
 
 import 'authentication/login.dart';
@@ -20,6 +21,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   bool loggedIn = false;
+  String email = '';
   @override
   void initState() {
     fetchData();
@@ -32,6 +34,7 @@ class _MyAppState extends State<MyApp> {
     if (prefs.getString('userEmail') != null) {
       setState(() {
         loggedIn = true;
+        email = prefs.getString('userEmail').toString();
       });
     }
   }
@@ -43,7 +46,11 @@ class _MyAppState extends State<MyApp> {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: loggedIn ? const HomePage() : const LoginPage(),
+      home: loggedIn
+          ? email.contains('telenant.admin.com')
+              ? const AdminHomeView()
+              : const HomePage()
+          : const LoginPage(),
     );
   }
 }

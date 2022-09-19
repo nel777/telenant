@@ -9,6 +9,7 @@ class details {
   String? contact;
   String? type;
   String? website;
+  String? managedBy;
 
   details(
       {this.name,
@@ -19,6 +20,7 @@ class details {
       this.gallery,
       this.contact,
       this.type,
+      this.managedBy,
       this.website});
 
   details.fromJson(Map<String, dynamic> json) {
@@ -33,6 +35,7 @@ class details {
     contact = json['contact'];
     type = json['type'];
     website = json['website'];
+    managedBy = json['managedBy'];
   }
 
   Map<String, dynamic> toJson() {
@@ -47,7 +50,8 @@ class details {
     data['gallery'] = gallery;
     data['contact'] = contact;
     data['type'] = type;
-    data['website'] = contact;
+    data['managedBy'] = managedBy;
+    data['website'] = website;
     return data;
   }
 }

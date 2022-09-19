@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:telenant/models/chatmodel.dart';
+import 'package:telenant/models/model.dart';
 
 class FirebaseFirestoreService {
   FirebaseFirestoreService._();
@@ -36,6 +37,17 @@ class FirebaseFirestoreService {
           .collection(email)
           .doc()
           .set(message.toJson());
+    } on FirebaseException catch (ex) {
+      throw ex.message.toString();
+    }
+  }
+
+  addTransient(details detail) {
+    try {
+      return FirebaseFirestore.instance
+          .collection("transientDetails")
+          .doc()
+          .set(detail.toJson());
     } on FirebaseException catch (ex) {
       throw ex.message.toString();
     }

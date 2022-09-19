@@ -1,4 +1,12 @@
+import 'dart:io';
+
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:telenant/models/model.dart';
+
+import '../../FirebaseServices/services.dart';
 
 class AddTransient extends StatefulWidget {
   const AddTransient({super.key});
@@ -8,6 +16,48 @@ class AddTransient extends StatefulWidget {
 }
 
 class _AddTransientState extends State<AddTransient> {
+  List<String> list = <String>['Townhouse', 'Apartment', 'Hotel'];
+  String dropdownValue = 'Townhouse';
+  ImagePicker picker = ImagePicker();
+  bool loading = false;
+  XFile? imagecover;
+  List<XFile>? imagealbum;
+  User? user = FirebaseAuth.instance.currentUser;
+  final TextEditingController _transient = TextEditingController();
+  final TextEditingController _location = TextEditingController();
+  final TextEditingController _contact = TextEditingController();
+  final TextEditingController _url = TextEditingController();
+  final TextEditingController _min = TextEditingController();
+  final TextEditingController _max = TextEditingController();
+  addImage(String from) async {
+    if (from == 'imagealbum') {
+      try {
+        var pickedfiles = await picker.pickMultiImage();
+        if (pickedfiles != null) {
+          imagealbum = pickedfiles;
+          setState(() {});
+        } else {
+          print("No image is selected.");
+        }
+      } catch (e) {
+        print("error while picking file.");
+      }
+      setState(() {});
+    } else {
+      imagecover = await picker.pickImage(source: ImageSource.gallery);
+      setState(() {});
+    }
+  }
+
+  Future<String> uploadFile(File image) async {
+    Reference storageReference = FirebaseStorage.instance
+        .ref()
+        .child('${user!.email.toString()}/${image.path.split('/').last}');
+    UploadTask uploadTask = storageReference.putFile(image);
+    await uploadTask;
+    return await storageReference.getDownloadURL();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -19,13 +69,108 @@ class _AddTransientState extends State<AddTransient> {
         child: SingleChildScrollView(
           child: Column(
             children: [
-              textWithField('Transient Name'),
-              textWithField('Location'),
-              textWithField('Contact'),
-              textWithField('Website URL'),
-              priceRange('Price Range'),
-              textWithField('Cover Page'),
-              textWithField('Location'),
+              textWithField('Transient Name', _transient),
+              textWithField('Location', _location),
+              textWithField('Contact', _contact),
+              textWithField('Website URL', _url),
+              Row(
+                //mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  priceRange('Price Range', _min, _max),
+                  const SizedBox(
+                    width: 10,
+                  ),
+                  type()
+                ],
+              ),
+              coverPageField('Cover Page'),
+              albumPageField('Gallery'),
+              const SizedBox(
+                height: 50,
+              ),
+              ElevatedButton(
+                  onPressed: () async {
+                    setState(() {
+                      loading = true;
+                    });
+                    try {
+                      var cover = '';
+                      List<dynamic> album = [];
+                      if (imagealbum != null) {
+                        var imageUrls = await Future.wait(imagealbum!
+                            .map((image) => uploadFile(File(image.path))));
+                        album = imageUrls;
+                      } else {}
+                      if (imagecover != null) {
+                        var imageUrls =
+                            await uploadFile(File(imagecover!.path));
+                        cover = imageUrls;
+                      }
+                      details detail = details(
+                        name: _transient.text,
+                        location: _location.text,
+                        contact: _contact.text,
+                        website: _url.text,
+                        type: dropdownValue,
+                        priceRange: PriceRange(
+                          min: int.parse(_min.text),
+                          max: int.parse(_max.text),
+                        ),
+                        coverPage: cover.toString(),
+                        gallery: album,
+                        managedBy: user!.email.toString(),
+                      );
+                      FirebaseFirestoreService.instance.addTransient(detail);
+                      setState(() {
+                        loading = false;
+                      });
+                      showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                                title: const Text('Success'),
+                                content:
+                                    const Text('Files uploaded successfully'),
+                                actions: <Widget>[
+                                  ElevatedButton(
+                                    child: const Text('Ok'),
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                      Navigator.of(context).pop();
+                                    },
+                                  )
+                                ],
+                              ));
+                    } catch (e) {
+                      setState(() {
+                        loading = false;
+                      });
+                      showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                                title: const Text('Error'),
+                                content: Text(e.toString()),
+                                actions: <Widget>[
+                                  ElevatedButton(
+                                    child: const Text('Ok'),
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                  )
+                                ],
+                              ));
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                      fixedSize: const Size(double.maxFinite, 45)),
+                  child: loading
+                      ? const SizedBox(
+                          height: 25,
+                          width: 25,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Text('Add Transient'))
             ],
           ),
         ),
@@ -33,7 +178,139 @@ class _AddTransientState extends State<AddTransient> {
     );
   }
 
-  Column textWithField(String name) {
+  Column albumPageField(String name) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          name,
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        Column(
+          children: [
+            InkWell(
+              splashColor: Colors.blue,
+              onTap: () {
+                addImage('imagealbum');
+              },
+              child: const Card(
+                  shape: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(15.0)),
+                      borderSide: BorderSide(width: 1.0)),
+                  child: ListTile(
+                    leading: Icon(Icons.image),
+                    title: Text('Select Images From Gallery'),
+                  )),
+            ),
+            const SizedBox(
+              height: 5,
+            ),
+            imagealbum != null
+                ? GridView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    gridDelegate:
+                        const SliverGridDelegateWithMaxCrossAxisExtent(
+                            maxCrossAxisExtent: 100,
+                            childAspectRatio: 0.5,
+                            crossAxisSpacing: 0.5,
+                            mainAxisSpacing: 0.5),
+                    itemCount: imagealbum!.length,
+                    itemBuilder: (BuildContext ctx, index) {
+                      return Container(
+                        alignment: Alignment.center,
+                        // decoration: BoxDecoration(
+                        //     color: Colors.amber,
+                        //     borderRadius: BorderRadius.circular(15)),
+                        child: Image.file(
+                          File(imagealbum![index].path),
+                          fit: BoxFit.fill,
+                        ),
+                      );
+                    })
+                : const SizedBox.shrink()
+          ],
+        )
+      ],
+    );
+  }
+
+  Column coverPageField(String name) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          name,
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        Column(
+          children: [
+            InkWell(
+              splashColor: Colors.blue,
+              onTap: () {
+                addImage('imagecover');
+              },
+              child: const Card(
+                  shape: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(15.0)),
+                      borderSide: BorderSide(width: 1.0)),
+                  child: ListTile(
+                    leading: Icon(Icons.camera_alt_rounded),
+                    title: Text('Select Image From Gallery'),
+                  )),
+            ),
+            imagecover != null
+                ? SizedBox(
+                    height: 100,
+                    width: MediaQuery.of(context).size.width,
+                    child: Image.file(
+                      File(imagecover!.path),
+                      fit: BoxFit.fill,
+                    ),
+                  )
+                : const SizedBox.shrink()
+          ],
+        )
+      ],
+    );
+  }
+
+  Column type() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Type',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        DropdownButton<String>(
+            value: dropdownValue,
+            icon: const Icon(Icons.arrow_downward),
+            elevation: 16,
+            underline: Container(
+              height: 2,
+              color: Colors.blue[900],
+            ),
+            onChanged: (String? value) {
+              // This is called when the user selects an item.
+              setState(() {
+                dropdownValue = value!;
+              });
+            },
+            items: list.map<DropdownMenuItem<String>>((String value) {
+              return DropdownMenuItem<String>(
+                value: value,
+                child: Text(value),
+              );
+            }).toList()),
+      ],
+    );
+  }
+
+  Column textWithField(String name, TextEditingController controller) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -43,6 +320,7 @@ class _AddTransientState extends State<AddTransient> {
           style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
         TextFormField(
+          controller: controller,
           decoration: const InputDecoration(
               contentPadding: EdgeInsets.all(10),
               border: OutlineInputBorder(
@@ -52,7 +330,8 @@ class _AddTransientState extends State<AddTransient> {
     );
   }
 
-  Column priceRange(String name) {
+  Column priceRange(
+      String name, TextEditingController min, TextEditingController max) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -69,6 +348,7 @@ class _AddTransientState extends State<AddTransient> {
             SizedBox(
               width: 100,
               child: TextFormField(
+                controller: min,
                 decoration: const InputDecoration(
                     label: Text('min'),
                     contentPadding: EdgeInsets.all(10),
@@ -83,6 +363,7 @@ class _AddTransientState extends State<AddTransient> {
             SizedBox(
               width: 100,
               child: TextFormField(
+                controller: max,
                 decoration: const InputDecoration(
                     label: Text('max'),
                     contentPadding: EdgeInsets.all(10),
