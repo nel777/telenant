@@ -48,8 +48,8 @@ class ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
         title: const Text("Contact Owner"),
       ),
       body: StreamBuilder<QuerySnapshot>(
-          stream: FirebaseFirestoreService.instance.retrieveChatMessages(
-              widget.transient.name.toString(), user!.email.toString()),
+          stream: FirebaseFirestoreService.instance
+              .retrieveChatMessages(widget.transient.name.toString()),
           builder: ((context, snapshot) {
             final List<ChatMessage> messages = [];
             if (snapshot.hasData) {

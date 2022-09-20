@@ -1,8 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:telenant/FirebaseServices/services.dart';
 import 'package:telenant/home/viewmore.dart';
 
+import '../authentication/login.dart';
 import '../models/model.dart';
 
 class ShowFiltered extends StatefulWidget {
@@ -14,27 +17,60 @@ class ShowFiltered extends StatefulWidget {
 }
 
 class _ShowFilteredState extends State<ShowFiltered> {
-  var test = [
-    details(
-      name: 'Pamela',
-      contact: '09085272866',
-      website: 'https://www.facebook.com/lenwilbaguio',
-      coverPage:
-          'https://axtgsckh4xo4.compat.objectstorage.ap-singapore-1.oraclecloud.com/baguio-visita/QuX1l5I632omTzYYFIpNVyiCYYCch1HWQKyFfeDq.jpg',
-      bedrooms: 1,
-      location: '23 Villain Street Engrs Hill',
-      priceRange: PriceRange(
-        min: 200,
-        max: 300,
-      ),
-    ),
-  ];
+  // var test = [
+  //   details(
+  //     name: 'Pamela',
+  //     contact: '09085272866',
+  //     website: 'https://www.facebook.com/lenwilbaguio',
+  //     coverPage:
+  //         'https://axtgsckh4xo4.compat.objectstorage.ap-singapore-1.oraclecloud.com/baguio-visita/QuX1l5I632omTzYYFIpNVyiCYYCch1HWQKyFfeDq.jpg',
+  //     bedrooms: 1,
+  //     location: '23 Villain Street Engrs Hill',
+  //     priceRange: PriceRange(
+  //       min: 200,
+  //       max: 300,
+  //     ),
+  //   ),
+  // ];
+  void logout() async {
+    await FirebaseAuth.instance.signOut();
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.remove('userEmail');
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
         title: const Text('Telenants'),
+        actions: [
+          IconButton(
+              onPressed: () {
+                showDialog(
+                    context: context,
+                    //barrierDismissible: false,
+                    builder: ((context) {
+                      return AlertDialog(
+                        title: const Text('Logout'),
+                        content: const Text('Are you sure you want to logout?'),
+                        actions: [
+                          ElevatedButton(
+                              onPressed: () async {
+                                Navigator.of(context).pop();
+                                logout();
+                                Navigator.of(context).pushReplacement(
+                                    MaterialPageRoute(
+                                        builder: ((context) =>
+                                            const LoginPage())));
+                              },
+                              child: const Text('Yes'))
+                        ],
+                      );
+                    }));
+              },
+              icon: const Icon(Icons.logout))
+        ],
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -46,6 +82,9 @@ class _ShowFilteredState extends State<ShowFiltered> {
                   if (snapshot.hasData) {
                     for (final detail in snapshot.data!.docs) {
                       print(detail['gallery']);
+                      print(widget.filtered['price']['max']);
+                      print(widget.filtered['price']['min'] <=
+                          detail['price_range']['max']);
 
                       if (detail['location'].toString().toLowerCase() ==
                               widget.filtered['location']
@@ -56,15 +95,15 @@ class _ShowFilteredState extends State<ShowFiltered> {
                                   .toString()
                                   .toLowerCase() ||
                           (((widget.filtered['price']['min'] <=
-                                      detail['pricerange'][1]) &&
+                                      detail['price_range']['max']) &&
                                   (widget.filtered['price']['min'] >=
-                                      detail['pricerange'][0])) ||
+                                      detail['price_range']['min'])) ||
                               ((widget.filtered['price']['max'] >=
-                                      detail['pricerange'][0]) ||
+                                      detail['price_range']['min']) ||
                                   ((widget.filtered['price']['max'] ==
-                                          detail['pricerange'][1]) ||
+                                          detail['price_range']['max']) ||
                                       (widget.filtered['price']['max'] >
-                                          detail['pricerange'][1]))))) {
+                                          detail['price_range']['max']))))) {
                         filteredList.add(details(
                           name: detail['name'],
                           gallery: detail['gallery'] as List<dynamic>,
@@ -73,7 +112,7 @@ class _ShowFilteredState extends State<ShowFiltered> {
                           contact: detail['contact'],
                           type: detail['type'],
                           website: detail['website'],
-                          coverPage: detail['coverpage'],
+                          coverPage: detail['cover_page'],
                         ));
                       }
                     }
@@ -203,7 +242,9 @@ class _ShowFilteredState extends State<ShowFiltered> {
                                                 Icons.pin_drop_rounded,
                                                 color: Colors.grey,
                                               ),
-                                              Text(test[0].location.toString()),
+                                              Text(filteredList[index]
+                                                  .location
+                                                  .toString()),
                                               const Spacer(),
                                               const Text(
                                                 'View More',

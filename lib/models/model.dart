@@ -3,7 +3,7 @@ class details {
   String? name;
   String? location;
   String? coverPage;
-  int? bedrooms;
+  String? bedrooms;
   PriceRange? priceRange;
   List<dynamic>? gallery;
   String? contact;

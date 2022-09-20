@@ -1,4 +1,5 @@
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:telenant/models/model.dart';
 
@@ -6,6 +7,7 @@ import '../chatmessaging/chatscreen.dart';
 
 class ViewMore extends StatefulWidget {
   final details detail;
+
   const ViewMore({Key? key, required this.detail}) : super(key: key);
 
   @override
@@ -13,12 +15,7 @@ class ViewMore extends StatefulWidget {
 }
 
 class _ViewMoreState extends State<ViewMore> {
-  // final List<String> imageList = [
-  //   'https://visita-storage-staging.s3.ap-southeast-1.amazonaws.com/31/IMG_20220324_212353.jpg',
-  //   'https://visita-storage-staging.s3.ap-southeast-1.amazonaws.com/30/IMG_20220324_212329.jpg',
-  //   'https://visita-storage-staging.s3.ap-southeast-1.amazonaws.com/32/IMG_20220324_212508.jpg',
-  //   'https://visita-storage-staging.s3.ap-southeast-1.amazonaws.com/33/IMG_20220324_212535.jpg'
-  // ];
+  User? user = FirebaseAuth.instance.currentUser;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -67,8 +64,8 @@ class _ViewMoreState extends State<ViewMore> {
                             elevation: 5.0,
                             shape: OutlineInputBorder(
                                 borderSide: const BorderSide(
-                                    style: BorderStyle.solid, width: 0.5),
-                                borderRadius: BorderRadius.circular(2)),
+                                    style: BorderStyle.none, width: 0.5),
+                                borderRadius: BorderRadius.circular(15)),
                             child: SizedBox(
                               width: MediaQuery.of(context).size.width - 20,
                               child: Column(
@@ -98,7 +95,11 @@ class _ViewMoreState extends State<ViewMore> {
                                   const SizedBox(
                                     height: 10,
                                   ),
-                                  iconText(Icons.web, 'Visit Website'),
+                                  InkWell(
+                                      splashColor: Colors.blue,
+                                      onTap: () {},
+                                      child:
+                                          iconText(Icons.web, 'Visit Website')),
                                   const Divider()
                                 ],
                               ),
@@ -191,23 +192,30 @@ class _ViewMoreState extends State<ViewMore> {
                             color: Colors.black54,
                           ),
                         ),
-                        Padding(
-                          padding: const EdgeInsets.only(left: 8.0, right: 8.0),
-                          child: ElevatedButton.icon(
-                              onPressed: () {
-                                Navigator.of(context).push(MaterialPageRoute(
-                                    builder: ((context) => ChatScreen(
-                                          transient: widget.detail,
-                                        ))));
-                              },
-                              style: ElevatedButton.styleFrom(
-                                  // /backgroundColor: Colors.,
-                                  fixedSize: Size(
-                                      MediaQuery.of(context).size.width - 16,
-                                      45)),
-                              icon: const Icon(Icons.room_service_rounded),
-                              label: const Text('Book/Reserve Transient')),
-                        ),
+                        widget.detail.managedBy == user!.email
+                            ? const SizedBox.shrink()
+                            : Padding(
+                                padding: const EdgeInsets.only(
+                                    left: 8.0, right: 8.0),
+                                child: ElevatedButton.icon(
+                                    onPressed: () {
+                                      Navigator.of(context)
+                                          .push(MaterialPageRoute(
+                                              builder: ((context) => ChatScreen(
+                                                    transient: widget.detail,
+                                                  ))));
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                        // /backgroundColor: Colors.,
+                                        fixedSize: Size(
+                                            MediaQuery.of(context).size.width -
+                                                16,
+                                            45)),
+                                    icon:
+                                        const Icon(Icons.room_service_rounded),
+                                    label:
+                                        const Text('Book/Reserve Transient')),
+                              ),
                       ],
                     )),
 

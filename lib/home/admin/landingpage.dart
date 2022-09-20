@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:telenant/home/admin/addtransient.dart';
-import 'package:telenant/home/admin/viewtransient.dart';
+import 'package:telenant/home/admin/homepageadmin.dart';
 
 class AdminHomeView extends StatefulWidget {
   const AdminHomeView({super.key});
@@ -13,16 +13,27 @@ class _AdminHomeViewState extends State<AdminHomeView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
+      //appBar: AppBar(),
       body: Container(
         decoration: const BoxDecoration(
             image: DecorationImage(
-                image: AssetImage('assets/images/room.jpg'),
+                image: AssetImage('assets/images/sunset.jpg'),
                 fit: BoxFit.cover)),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
+            const Text(
+              'Welcome\nThis is the admin page. Please select an action below.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 25,
+                  fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(
+              height: 25,
+            ),
             Padding(
               padding: const EdgeInsets.only(left: 16.0, right: 16.0),
               child: ElevatedButton(
@@ -33,7 +44,7 @@ class _AdminHomeViewState extends State<AdminHomeView> {
                   style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.amber,
                       fixedSize: const Size(double.maxFinite, 40)),
-                  child: const Text('Home')),
+                  child: const Text('Go to Home')),
             ),
             Padding(
               padding: const EdgeInsets.only(left: 16.0, right: 16.0),
