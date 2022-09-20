@@ -247,6 +247,8 @@ class _ManageAccountState extends State<ManageAccount> {
                                           color: Colors.yellow,
                                         ),
                                         title:
+                                            Text(feedbacks[index]['managedBy']),
+                                        subtitle:
                                             Text(feedbacks[index]['feedback']),
                                       ),
                                       const SizedBox(

@@ -224,7 +224,7 @@ class _ShowFilteredState extends State<ShowFiltered> {
                                               ),
                                               const Spacer(),
                                               Text(
-                                                  '${filteredList[index].bedrooms.toString()} Bed'),
+                                                  '${filteredList[index].bedrooms.toString() == 'null' ? '???' : filteredList[index].bedrooms.toString()} Bed'),
                                               // Padding(
                                               //   padding: EdgeInsets.only(left: 5.0, right: 5.0),
                                               //   child: Text('|'),

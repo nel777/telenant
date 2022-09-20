@@ -168,7 +168,7 @@ class _SearchDemoSearchDelegate extends SearchDelegate<List<String>> {
                                 topRight: Radius.circular(10),
                                 topLeft: Radius.circular(10)),
                             child: Image.network(
-                              finaldata['coverpage'],
+                              finaldata['cover_page'],
                               width: 500,
                               height: 200,
                               fit: BoxFit.cover,
@@ -207,7 +207,7 @@ class _SearchDemoSearchDelegate extends SearchDelegate<List<String>> {
                                               detail: details(
                                             name: finaldata!['name'],
                                             location: finaldata['location'],
-                                            coverPage: finaldata['coverpage'],
+                                            coverPage: finaldata['cover_page'],
                                             bedrooms: finaldata['bedrooms'],
                                             gallery: finaldata['gallery'],
                                             // priceRange: PriceRange(
@@ -283,24 +283,29 @@ class _SuggestionList extends StatelessWidget {
       itemCount: suggestions.length,
       itemBuilder: (BuildContext context, int i) {
         final String suggestion = suggestions[i];
-        return ListTile(
-          leading: query.isEmpty ? const Icon(Icons.history) : const Icon(null),
-          title: RichText(
-            text: TextSpan(
-              text: suggestion.substring(0, query.length),
-              style: const TextStyle(color: Colors.black),
-              children: <TextSpan>[
-                TextSpan(
-                  text: suggestion.substring(query.length),
-                  //style: theme.textTheme.subhead,
-                ),
-              ],
-            ),
-          ),
-          onTap: () {
-            onSelected(suggestion);
-          },
-        );
+        return suggestion.toLowerCase().contains(query.toLowerCase())
+            ? ListTile(
+                leading: query.isEmpty
+                    ? const Icon(Icons.history)
+                    : const Icon(null),
+                title: Text(suggestion),
+                //  RichText(
+                //   text: TextSpan(
+                //     text: suggestion.substring(0, query.length),
+                //     style: const TextStyle(color: Colors.black),
+                //     children: <TextSpan>[
+                //       TextSpan(
+                //         text: suggestion.substring(query.length),
+                //         //style: theme.textTheme.subhead,
+                //       ),
+                //     ],
+                //   ),
+                // ),
+                onTap: () {
+                  onSelected(suggestion);
+                },
+              )
+            : const SizedBox.shrink();
       },
     );
   }

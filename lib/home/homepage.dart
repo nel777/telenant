@@ -77,19 +77,19 @@ class _HomePageState extends State<HomePage> {
                     );
                   }));
             },
-            icon: const Icon(Icons.arrow_back_rounded, color: Colors.black87)),
+            icon: const Icon(Icons.logout, color: Colors.black87)),
         title: const Text(
           'Filter',
           style: TextStyle(color: Colors.black87),
         ),
-        actions: [
-          TextButton.icon(
-              onPressed: () {},
-              icon: const Icon(Icons.refresh, color: Colors.black87),
-              label: const Text(
-                'Reset',
-                style: TextStyle(color: Colors.black87),
-              ))
+        actions: const [
+          // TextButton.icon(
+          //     onPressed: () {},
+          //     icon: const Icon(Icons.refresh, color: Colors.black87),
+          //     label: const Text(
+          //       'Reset',
+          //       style: TextStyle(color: Colors.black87),
+          //     ))
         ],
       ),
       body: SingleChildScrollView(
