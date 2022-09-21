@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -24,13 +26,34 @@ class _ViewMessagesState extends State<ViewMessages> {
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestoreService.instance
-            .retrieveChatMessages(widget.transient),
+            .testretrieveChatMessages(widget.transient),
         builder: ((context, snapshot) {
           List<QueryDocumentSnapshot> messages = [];
+          List<Map<String, dynamic>> emails = [];
+          List<dynamic> result = [];
+          List<Map<String, dynamic>> finalList = [];
           if (snapshot.hasData) {
             for (final message in snapshot.data!.docs) {
               messages.add(message);
+              // for (var element in messages) {
+              //   if (element['from'] == message['from']) {
+              //     messages.remove(element);
+              //   }
+              // }
             }
+
+            for (var element in messages) {
+              // print(emails.contains(element['from']));
+              if (!element['from'].toString().contains('telenant.admin.com')) {
+                emails.add({
+                  'email': element['from'],
+                  'transient_name': element['transient_name'],
+                });
+              }
+            }
+            final jsonList = emails.map((e) => jsonEncode(e)).toList();
+            final uniqueEmails = jsonList.toSet().toList();
+            result = uniqueEmails.map((e) => jsonDecode(e)).toList();
           }
           return messages.isEmpty
               ? Center(
@@ -57,26 +80,26 @@ class _ViewMessagesState extends State<ViewMessages> {
                   ),
                 )
               : ListView.builder(
-                  itemCount: messages.length,
+                  itemCount: result.length,
                   itemBuilder: ((context, index) {
-                    return user!.email != messages[index]['from']
-                        ? InkWell(
-                            onTap: () {
-                              Navigator.of(context).push(MaterialPageRoute(
-                                  builder: ((context) => ChatScreen(
-                                        transient: details(
-                                          name: messages[index]['to'],
-                                        ),
-                                      ))));
-                            },
-                            child: Card(
-                              elevation: 5.0,
-                              child: ListTile(
-                                title: Text(messages[index]['from']),
-                                trailing: const Icon(Icons.arrow_forward_ios),
-                              ),
-                            ))
-                        : const SizedBox.shrink();
+                    return InkWell(
+                        onTap: () {
+                          Navigator.of(context).push(MaterialPageRoute(
+                              builder: ((context) => ChatScreen(
+                                    from: result[index]['email'],
+                                    sendto: result[index]['email'],
+                                    transient: details(
+                                      name: result[index]['transient_name'],
+                                    ),
+                                  ))));
+                        },
+                        child: Card(
+                          elevation: 5.0,
+                          child: ListTile(
+                            title: Text(result[index]['email']),
+                            trailing: const Icon(Icons.arrow_forward_ios),
+                          ),
+                        ));
                   }));
         }),
       ),

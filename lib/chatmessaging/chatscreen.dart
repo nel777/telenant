@@ -9,7 +9,10 @@ import 'chatmessage.dart';
 
 class ChatScreen extends StatefulWidget {
   final details transient;
-  const ChatScreen({Key? key, required this.transient}) : super(key: key);
+  final String? sendto;
+  final String? from;
+  const ChatScreen({Key? key, required this.transient, this.sendto, this.from})
+      : super(key: key);
 
   @override
   ChatScreenState createState() => ChatScreenState();
@@ -49,20 +52,41 @@ class ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
       ),
       body: StreamBuilder<QuerySnapshot>(
           stream: FirebaseFirestoreService.instance
-              .retrieveChatMessages(widget.transient.name.toString()),
+              .testretrieveChatMessages(widget.transient.name.toString()),
           builder: ((context, snapshot) {
             final List<ChatMessage> messages = [];
             if (snapshot.hasData) {
               for (final thismessage in snapshot.data!.docs) {
-                var message = ChatMessage(
-                    email: user!.email.toString(),
-                    text: thismessage['message'],
-                    myname: thismessage['from'],
-                    animationController: AnimationController(
-                        duration: const Duration(milliseconds: 500),
-                        vsync: this));
-                messages.insert(messages.length, message);
-                message.animationController.forward();
+                if (widget.from == null) {
+                  if (thismessage['from'] == user!.email ||
+                      thismessage['to'] == user!.email) {
+                    var message = ChatMessage(
+                        email: user!.email.toString(),
+                        text: thismessage['message'],
+                        myname: thismessage['from'],
+                        animationController: AnimationController(
+                            duration: const Duration(milliseconds: 500),
+                            vsync: this));
+                    messages.insert(messages.length, message);
+                    message.animationController.forward();
+                  }
+                } else {
+                  print(widget.from);
+                  if ((thismessage['from'] == widget.from &&
+                          thismessage['to'] == user!.email) ||
+                      (thismessage['to'] == widget.from &&
+                          thismessage['from'] == user!.email)) {
+                    var message = ChatMessage(
+                        email: user!.email.toString(),
+                        text: thismessage['message'],
+                        myname: thismessage['from'],
+                        animationController: AnimationController(
+                            duration: const Duration(milliseconds: 500),
+                            vsync: this));
+                    messages.insert(messages.length, message);
+                    message.animationController.forward();
+                  }
+                }
               }
             }
             return Column(
@@ -111,12 +135,14 @@ class ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
                   try {
                     FirebaseFirestoreService.instance.sendChatMessages(
                         widget.transient.name.toString(),
-                        user!.email.toString(),
                         MessageModel(
-                          to: widget.transient.name.toString(),
+                          to: user!.email!.contains('telenant.admin.com')
+                              ? widget.sendto
+                              : widget.transient.managedBy,
                           from: user!.email.toString(),
                           message: _textController.text,
                           timepressed: Timestamp.now(),
+                          transientname: widget.transient.name,
                         ));
                     _textController.clear();
                   } on FirebaseException catch (ex) {

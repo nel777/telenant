@@ -4,12 +4,14 @@ class MessageModel {
   String? to;
   String? from;
   String? message;
+  String? transientname;
   Timestamp? timepressed;
 
   MessageModel({
     this.to,
     this.from,
     this.message,
+    this.transientname,
     this.timepressed,
   });
 
@@ -17,6 +19,7 @@ class MessageModel {
     to = json['to'];
     from = json['from'];
     message = json['message'];
+    transientname = json['transientname'];
     timepressed = json['timepressed'];
   }
 
@@ -25,6 +28,7 @@ class MessageModel {
     data['to'] = to;
     data['from'] = from;
     data['message'] = message;
+    data['transient_name'] = transientname;
     data['timepressed'] = timepressed;
     return data;
   }
@@ -33,5 +37,6 @@ class MessageModel {
       : to = doc.data()!["to"],
         from = doc.data()!["from"],
         message = doc.data()!["message"],
+        transientname = doc.data()!["transientname"],
         timepressed = doc.data()!["timepressed"];
 }

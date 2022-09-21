@@ -113,6 +113,22 @@ class _HomePageState extends State<HomePage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
+                        Row(
+                          children: const [
+                            Icon(Icons.location_searching_rounded),
+                            SizedBox(
+                              width: 10,
+                            ),
+                            Text(
+                              'Available Locations',
+                              style: TextStyle(
+                                  fontSize: 25, fontWeight: FontWeight.bold),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(
+                          height: 15,
+                        ),
                         DropdownButtonFormField(
                             decoration: InputDecoration(
                                 // enabledBorder: const OutlineInputBorder(
@@ -157,37 +173,37 @@ class _HomePageState extends State<HomePage> {
                         const SizedBox(
                           height: 20,
                         ),
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Property Types',
-                              style: TextStyle(
-                                  fontSize: 25, fontWeight: FontWeight.bold),
-                            ),
-                            const SizedBox(
-                              height: 10,
-                            ),
-                            SingleChildScrollView(
-                              scrollDirection: Axis.horizontal,
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  propertyType(Icons.apartment, 'Apartment'),
-                                  propertyType(Icons.house, 'Townhouse'),
-                                  propertyType(Icons.hotel, 'Hotel'),
-                                  // propertyType(
-                                  //     Icons.view_timeline_rounded, 'Any'),
-                                ],
-                              ),
-                            )
-                          ],
-                        ),
-                        const Divider(
-                          color: Colors.black,
-                        ),
+                        // Column(
+                        //   mainAxisAlignment: MainAxisAlignment.start,
+                        //   crossAxisAlignment: CrossAxisAlignment.start,
+                        //   children: [
+                        //     const Text(
+                        //       'Property Types',
+                        //       style: TextStyle(
+                        //           fontSize: 25, fontWeight: FontWeight.bold),
+                        //     ),
+                        //     const SizedBox(
+                        //       height: 10,
+                        //     ),
+                        //     SingleChildScrollView(
+                        //       scrollDirection: Axis.horizontal,
+                        //       child: Row(
+                        //         mainAxisAlignment:
+                        //             MainAxisAlignment.spaceBetween,
+                        //         children: [
+                        //           propertyType(Icons.apartment, 'Apartment'),
+                        //           propertyType(Icons.house, 'Townhouse'),
+                        //           propertyType(Icons.hotel, 'Hotel'),
+                        //           // propertyType(
+                        //           //     Icons.view_timeline_rounded, 'Any'),
+                        //         ],
+                        //       ),
+                        //     )
+                        //   ],
+                        // ),
+                        // const Divider(
+                        //   color: Colors.black,
+                        // ),
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.start,
@@ -421,8 +437,11 @@ class _HomePageState extends State<HomePage> {
                         const SizedBox(
                           height: 50,
                         ),
-                        ElevatedButton(
+                        ElevatedButton.icon(
+                            icon: const Icon(Icons.arrow_forward_ios_rounded),
                             style: ElevatedButton.styleFrom(
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20)),
                                 fixedSize: const Size(double.maxFinite, 40)),
                             onPressed: () {
                               Map<String, int> pricerange = {
@@ -445,7 +464,7 @@ class _HomePageState extends State<HomePage> {
                               // print(min);
                               // print(max);
                             },
-                            child: const Text('Proceed')),
+                            label: const Text('Proceed')),
                       ],
                     ),
                   );

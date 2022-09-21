@@ -18,7 +18,20 @@ class FirebaseFirestoreService {
   Stream<QuerySnapshot<Object?>> retrieveChatMessages(String name) {
     try {
       return FirebaseFirestore.instance
-          .collection("chatMessage")
+          .collection("chatMessaging")
+          .doc(name)
+          .collection('messages')
+          .orderBy('timepressed')
+          .snapshots();
+    } on FirebaseException catch (ex) {
+      throw ex.message.toString();
+    }
+  }
+
+  Stream<QuerySnapshot<Object?>> testretrieveChatMessages(String name) {
+    try {
+      return FirebaseFirestore.instance
+          .collection("chatMessaging")
           .doc(name)
           .collection('messages')
           .orderBy('timepressed')
@@ -36,10 +49,10 @@ class FirebaseFirestoreService {
     }
   }
 
-  sendChatMessages(String name, String email, MessageModel message) {
+  sendChatMessages(String name, MessageModel message) {
     try {
       return FirebaseFirestore.instance
-          .collection("chatMessage")
+          .collection("chatMessaging")
           .doc(name)
           .collection('messages')
           .doc()
