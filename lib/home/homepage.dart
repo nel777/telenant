@@ -173,37 +173,36 @@ class _HomePageState extends State<HomePage> {
                         const SizedBox(
                           height: 20,
                         ),
-                        // Column(
-                        //   mainAxisAlignment: MainAxisAlignment.start,
-                        //   crossAxisAlignment: CrossAxisAlignment.start,
-                        //   children: [
-                        //     const Text(
-                        //       'Property Types',
-                        //       style: TextStyle(
-                        //           fontSize: 25, fontWeight: FontWeight.bold),
-                        //     ),
-                        //     const SizedBox(
-                        //       height: 10,
-                        //     ),
-                        //     SingleChildScrollView(
-                        //       scrollDirection: Axis.horizontal,
-                        //       child: Row(
-                        //         mainAxisAlignment:
-                        //             MainAxisAlignment.spaceBetween,
-                        //         children: [
-                        //           propertyType(Icons.apartment, 'Apartment'),
-                        //           propertyType(Icons.house, 'Townhouse'),
-                        //           propertyType(Icons.hotel, 'Hotel'),
-                        //           // propertyType(
-                        //           //     Icons.view_timeline_rounded, 'Any'),
-                        //         ],
-                        //       ),
-                        //     )
-                        //   ],
-                        // ),
-                        // const Divider(
-                        //   color: Colors.black,
-                        // ),
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Property Types',
+                              style: TextStyle(
+                                  fontSize: 25, fontWeight: FontWeight.bold),
+                            ),
+                            const SizedBox(
+                              height: 10,
+                            ),
+                            SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  propertyType(Icons.apartment, 'Apartment'),
+                                  propertyType(Icons.house, 'Townhouse'),
+                                  // propertyType(
+                                  //     Icons.view_timeline_rounded, 'Any'),
+                                ],
+                              ),
+                            )
+                          ],
+                        ),
+                        const Divider(
+                          color: Colors.black,
+                        ),
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.start,

@@ -112,6 +112,7 @@ class _ShowFilteredState extends State<ShowFiltered> {
                           contact: detail['contact'],
                           type: detail['type'],
                           website: detail['website'],
+                          managedBy: detail['managedBy'],
                           coverPage: detail['cover_page'],
                         ));
                       }
