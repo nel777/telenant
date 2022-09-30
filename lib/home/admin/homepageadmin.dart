@@ -4,10 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:telenant/FirebaseServices/services.dart';
 import 'package:telenant/home/admin/manageaccount.dart';
-import 'package:telenant/home/viewmore.dart';
 import 'package:telenant/models/model.dart';
 
 import '../../authentication/login.dart';
+import '../viewmore.dart';
 import 'addtransient.dart';
 
 class ViewTransient extends StatefulWidget {
@@ -78,6 +78,7 @@ class _ViewTransientState extends State<ViewTransient> {
           stream: FirebaseFirestoreService.instance.readItems(),
           builder: ((context, snapshot) {
             List<details> listOfTransients = [];
+            DocumentSnapshot? documentSnapshot;
             if (snapshot.hasData) {
               for (final detail in snapshot.data!.docs) {
                 //print(detail['gallery'].toString());
@@ -94,9 +95,11 @@ class _ViewTransientState extends State<ViewTransient> {
                         max: detail['price_range']['max']),
                     coverPage: detail['cover_page'].toString(),
                     gallery: detail['gallery'],
+                    docId: detail.id,
                   ));
                 }
               }
+
               //print(listOfTransients[0].contact);
             }
             return ListView.builder(
@@ -157,6 +160,7 @@ class _ViewTransientState extends State<ViewTransient> {
                                 onPressed: () {
                                   Navigator.of(context).push(MaterialPageRoute(
                                       builder: ((context) => ViewMore(
+                                          docId: listOfTransients[index].docId,
                                           detail: listOfTransients[index]))));
                                 },
                                 child: const Text(
