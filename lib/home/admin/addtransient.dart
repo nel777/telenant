@@ -16,7 +16,7 @@ class AddTransient extends StatefulWidget {
 }
 
 class _AddTransientState extends State<AddTransient> {
-  List<String> list = <String>['Townhouse', 'Apartment', 'Hotel'];
+  List<String> list = <String>['Townhouse', 'Apartment'];
   String dropdownValue = 'Townhouse';
   ImagePicker picker = ImagePicker();
   bool loading = false;

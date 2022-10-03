@@ -137,88 +137,88 @@ class _ViewMoreState extends State<ViewMore> {
                         ],
                       ),
                     )),
-                widget.detail.managedBy == user!.email
-                    ? Positioned(
-                        top: 230,
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Padding(
-                                padding: EdgeInsets.all(8.0),
-                                child: Text(
-                                  'Cover Page',
-                                  style: TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 28,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                              ),
-                              Card(
-                                elevation: 5.0,
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  crossAxisAlignment: CrossAxisAlignment.end,
-                                  children: [
-                                    ClipRRect(
-                                      borderRadius: const BorderRadius.only(
-                                          topLeft: Radius.circular(5.0),
-                                          topRight: Radius.circular(5.0)),
-                                      child: Image.network(
-                                        coverPage!,
-                                        width:
-                                            MediaQuery.of(context).size.width -
-                                                20,
-                                        height: 150,
-                                        fit: BoxFit.cover,
-                                        loadingBuilder: (BuildContext context,
-                                            Widget child,
-                                            ImageChunkEvent? loadingProgress) {
-                                          if (loadingProgress == null) {
-                                            return child;
-                                          }
-                                          return Center(
-                                            child: CircularProgressIndicator(
-                                              value: loadingProgress
-                                                          .expectedTotalBytes !=
-                                                      null
-                                                  ? loadingProgress
-                                                          .cumulativeBytesLoaded /
-                                                      loadingProgress
-                                                          .expectedTotalBytes!
-                                                  : null,
-                                            ),
-                                          );
-                                        },
-                                      ),
-                                    ),
-                                    TextButton.icon(
-                                      icon: const Icon(Icons.find_replace),
-                                      label: const Text('Replace'),
-                                      onPressed: () async {
-                                        XFile? imagecover =
-                                            await picker.pickImage(
-                                                source: ImageSource.gallery);
-                                        String url = await uploadFile(
-                                            File(imagecover!.path));
-                                        setState(() {
-                                          coverPage = url;
-                                        });
-                                        await FirebaseFirestore.instance
-                                            .collection("transientDetails")
-                                            .doc(widget.docId)
-                                            .update({"cover_page": url});
-                                      },
-                                    )
-                                  ],
-                                ),
-                              )
-                            ],
+                Positioned(
+                    top: 230,
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Padding(
+                            padding: EdgeInsets.all(8.0),
+                            child: Text(
+                              'Cover Page',
+                              style: TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 28,
+                                  fontWeight: FontWeight.bold),
+                            ),
                           ),
-                        ))
-                    : const SizedBox.shrink(),
+                          Card(
+                            elevation: 5.0,
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                ClipRRect(
+                                  borderRadius: const BorderRadius.only(
+                                      topLeft: Radius.circular(5.0),
+                                      topRight: Radius.circular(5.0)),
+                                  child: Image.network(
+                                    coverPage!,
+                                    width:
+                                        MediaQuery.of(context).size.width - 20,
+                                    height: 150,
+                                    fit: BoxFit.cover,
+                                    loadingBuilder: (BuildContext context,
+                                        Widget child,
+                                        ImageChunkEvent? loadingProgress) {
+                                      if (loadingProgress == null) {
+                                        return child;
+                                      }
+                                      return Center(
+                                        child: CircularProgressIndicator(
+                                          value: loadingProgress
+                                                      .expectedTotalBytes !=
+                                                  null
+                                              ? loadingProgress
+                                                      .cumulativeBytesLoaded /
+                                                  loadingProgress
+                                                      .expectedTotalBytes!
+                                              : null,
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                                widget.detail.managedBy == user!.email
+                                    ? TextButton.icon(
+                                        icon: const Icon(Icons.find_replace),
+                                        label: const Text('Replace'),
+                                        onPressed: () async {
+                                          XFile? imagecover =
+                                              await picker.pickImage(
+                                                  source: ImageSource.gallery);
+                                          String url = await uploadFile(
+                                              File(imagecover!.path));
+                                          setState(() {
+                                            coverPage = url;
+                                          });
+                                          await FirebaseFirestore.instance
+                                              .collection("transientDetails")
+                                              .doc(widget.docId)
+                                              .update({"cover_page": url});
+                                        },
+                                      )
+                                    : const SizedBox.shrink()
+                              ],
+                            ),
+                          )
+                        ],
+                      ),
+                    )),
+
                 Positioned(
                     top: 490,
                     child: Column(
@@ -245,7 +245,7 @@ class _ViewMoreState extends State<ViewMore> {
                             : Container(
                                 height: widget.detail.managedBy == user!.email
                                     ? 350
-                                    : 280,
+                                    : 285,
                                 width: 300,
                                 margin: const EdgeInsets.all(15),
                                 child: CarouselSlider.builder(
@@ -304,212 +304,217 @@ class _ViewMoreState extends State<ViewMore> {
                                             ),
                                           ),
                                         ),
-                                        Row(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.center,
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: [
-                                            Expanded(
-                                                child: InkWell(
-                                              onTap: () {
-                                                showDialog(
-                                                    context: context,
-                                                    builder: ((context) {
-                                                      return AlertDialog(
-                                                        title: const Text(
-                                                            'Replace'),
-                                                        content: const Text(
-                                                            'Do you want to proceed in replacing this image?'),
-                                                        actions: [
-                                                          ElevatedButton(
-                                                              onPressed:
-                                                                  () async {
-                                                                List<dynamic>?
-                                                                    oldGallery =
-                                                                    albums;
-                                                                List<dynamic>
-                                                                    updatedGallery =
-                                                                    [];
-                                                                String
-                                                                    urlToReplace =
-                                                                    widget
-                                                                        .detail
-                                                                        .gallery![i];
+                                        widget.detail.managedBy == user!.email
+                                            ? Row(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.center,
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
+                                                children: [
+                                                  Expanded(
+                                                      child: InkWell(
+                                                    onTap: () {
+                                                      showDialog(
+                                                          context: context,
+                                                          builder: ((context) {
+                                                            return AlertDialog(
+                                                              title: const Text(
+                                                                  'Replace'),
+                                                              content: const Text(
+                                                                  'Do you want to proceed in replacing this image?'),
+                                                              actions: [
+                                                                ElevatedButton(
+                                                                    onPressed:
+                                                                        () async {
+                                                                      List<dynamic>?
+                                                                          oldGallery =
+                                                                          albums;
+                                                                      List<dynamic>
+                                                                          updatedGallery =
+                                                                          [];
+                                                                      String
+                                                                          urlToReplace =
+                                                                          widget
+                                                                              .detail
+                                                                              .gallery![i];
+                                                                      XFile?
+                                                                          imagecover =
+                                                                          await picker.pickImage(
+                                                                              source: ImageSource.gallery);
+                                                                      if (widget
+                                                                              .detail
+                                                                              .gallery !=
+                                                                          null) {
+                                                                        for (String url
+                                                                            in oldGallery!) {
+                                                                          if (url ==
+                                                                              urlToReplace) {
+                                                                            var finalUrl =
+                                                                                await uploadFile(File(imagecover!.path));
+                                                                            oldGallery[oldGallery.indexOf(urlToReplace)] =
+                                                                                finalUrl;
+                                                                            updatedGallery =
+                                                                                oldGallery;
+                                                                          }
+                                                                        }
+                                                                      }
+                                                                      await FirebaseFirestore
+                                                                          .instance
+                                                                          .collection(
+                                                                              "transientDetails")
+                                                                          .doc(widget
+                                                                              .docId)
+                                                                          .update({
+                                                                        "gallery":
+                                                                            updatedGallery
+                                                                      });
+                                                                      if (!mounted) {
+                                                                        return;
+                                                                      }
+                                                                      Navigator.of(
+                                                                              context)
+                                                                          .pop();
+                                                                    },
+                                                                    child: const Text(
+                                                                        'Yes')),
+                                                                OutlinedButton(
+                                                                    onPressed:
+                                                                        () {
+                                                                      Navigator.of(
+                                                                              context)
+                                                                          .pop();
+                                                                    },
+                                                                    child: const Text(
+                                                                        'Cancel'))
+                                                              ],
+                                                            );
+                                                          }));
+                                                    },
+                                                    child: Card(
+                                                        child: Padding(
+                                                      padding:
+                                                          const EdgeInsets.all(
+                                                              10.0),
+                                                      child: Row(
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .center,
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .center,
+                                                        children: [
+                                                          Icon(
+                                                            Icons.edit,
+                                                            color: Colors
+                                                                .green[200],
+                                                          ),
+                                                          const SizedBox(
+                                                            width: 5,
+                                                          ),
+                                                          const Text('Replace')
+                                                        ],
+                                                      ),
+                                                    )),
+                                                  )),
+                                                  Expanded(
+                                                      child: InkWell(
+                                                    onTap: () {
+                                                      showDialog(
+                                                          context: context,
+                                                          builder: ((context) {
+                                                            return AlertDialog(
+                                                              title: const Text(
+                                                                  'Delete'),
+                                                              content: const Text(
+                                                                  'Are you sure you want to delete this image?'),
+                                                              actions: [
+                                                                ElevatedButton(
+                                                                    onPressed:
+                                                                        () async {
+                                                                      List<dynamic>
+                                                                          oldGallery =
+                                                                          albums!;
+                                                                      List<dynamic>
+                                                                          updatedGallery =
+                                                                          [];
+                                                                      String
+                                                                          urlToReplace =
+                                                                          widget
+                                                                              .detail
+                                                                              .gallery![i];
+                                                                      oldGallery
+                                                                          .remove(
+                                                                              urlToReplace);
 
-                                                                print(
-                                                                    oldGallery);
-                                                                print(
-                                                                    '---------------------------');
-                                                                XFile?
-                                                                    imagecover =
-                                                                    await picker
-                                                                        .pickImage(
-                                                                            source:
-                                                                                ImageSource.gallery);
-                                                                if (widget
-                                                                        .detail
-                                                                        .gallery !=
-                                                                    null) {
-                                                                  for (String url
-                                                                      in oldGallery!) {
-                                                                    if (url ==
-                                                                        urlToReplace) {
-                                                                      var finalUrl =
-                                                                          await uploadFile(
-                                                                              File(imagecover!.path));
-                                                                      oldGallery[
-                                                                              oldGallery.indexOf(urlToReplace)] =
-                                                                          finalUrl;
                                                                       updatedGallery =
                                                                           oldGallery;
-                                                                    }
-                                                                  }
-                                                                }
-                                                                await FirebaseFirestore
-                                                                    .instance
-                                                                    .collection(
-                                                                        "transientDetails")
-                                                                    .doc(widget
-                                                                        .docId)
-                                                                    .update({
-                                                                  "gallery":
-                                                                      updatedGallery
-                                                                });
-                                                                if (!mounted) {
-                                                                  return;
-                                                                }
-                                                                Navigator.of(
-                                                                        context)
-                                                                    .pop();
-                                                              },
-                                                              child: const Text(
-                                                                  'Yes')),
-                                                          OutlinedButton(
-                                                              onPressed: () {
-                                                                Navigator.of(
-                                                                        context)
-                                                                    .pop();
-                                                              },
-                                                              child: const Text(
-                                                                  'Cancel'))
-                                                        ],
-                                                      );
-                                                    }));
-                                              },
-                                              child: Card(
-                                                  child: Padding(
-                                                padding:
-                                                    const EdgeInsets.all(10.0),
-                                                child: Row(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.center,
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment.center,
-                                                  children: [
-                                                    Icon(
-                                                      Icons.edit,
-                                                      color: Colors.green[200],
-                                                    ),
-                                                    const SizedBox(
-                                                      width: 5,
-                                                    ),
-                                                    const Text('Replace')
-                                                  ],
-                                                ),
-                                              )),
-                                            )),
-                                            Expanded(
-                                                child: InkWell(
-                                              onTap: () {
-                                                showDialog(
-                                                    context: context,
-                                                    builder: ((context) {
-                                                      return AlertDialog(
-                                                        title: const Text(
-                                                            'Delete'),
-                                                        content: const Text(
-                                                            'Are you sure you want to delete this image?'),
-                                                        actions: [
-                                                          ElevatedButton(
-                                                              onPressed:
-                                                                  () async {
-                                                                List<dynamic>
-                                                                    oldGallery =
-                                                                    albums!;
-                                                                List<dynamic>
-                                                                    updatedGallery =
-                                                                    [];
-                                                                String
-                                                                    urlToReplace =
-                                                                    widget
-                                                                        .detail
-                                                                        .gallery![i];
-                                                                oldGallery.remove(
-                                                                    urlToReplace);
 
-                                                                updatedGallery =
-                                                                    oldGallery;
-
-                                                                await FirebaseFirestore
-                                                                    .instance
-                                                                    .collection(
-                                                                        "transientDetails")
-                                                                    .doc(widget
-                                                                        .docId)
-                                                                    .update({
-                                                                  "gallery":
-                                                                      updatedGallery
-                                                                });
-                                                                if (!mounted) {
-                                                                  return;
-                                                                }
-                                                                setState(() {
-                                                                  albums =
-                                                                      updatedGallery;
-                                                                });
-                                                                Navigator.of(
-                                                                        context)
-                                                                    .pop();
-                                                              },
-                                                              child: const Text(
-                                                                  'Yes')),
-                                                          OutlinedButton(
-                                                              onPressed: () {
-                                                                Navigator.of(
-                                                                        context)
-                                                                    .pop();
-                                                              },
-                                                              child: const Text(
-                                                                  'No'))
+                                                                      await FirebaseFirestore
+                                                                          .instance
+                                                                          .collection(
+                                                                              "transientDetails")
+                                                                          .doc(widget
+                                                                              .docId)
+                                                                          .update({
+                                                                        "gallery":
+                                                                            updatedGallery
+                                                                      });
+                                                                      if (!mounted) {
+                                                                        return;
+                                                                      }
+                                                                      setState(
+                                                                          () {
+                                                                        albums =
+                                                                            updatedGallery;
+                                                                      });
+                                                                      Navigator.of(
+                                                                              context)
+                                                                          .pop();
+                                                                    },
+                                                                    child: const Text(
+                                                                        'Yes')),
+                                                                OutlinedButton(
+                                                                    onPressed:
+                                                                        () {
+                                                                      Navigator.of(
+                                                                              context)
+                                                                          .pop();
+                                                                    },
+                                                                    child:
+                                                                        const Text(
+                                                                            'No'))
+                                                              ],
+                                                            );
+                                                          }));
+                                                    },
+                                                    child: Card(
+                                                        child: Padding(
+                                                      padding:
+                                                          const EdgeInsets.all(
+                                                              10.0),
+                                                      child: Row(
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .center,
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .center,
+                                                        children: const [
+                                                          Icon(
+                                                            Icons.delete,
+                                                            color: Colors.red,
+                                                          ),
+                                                          SizedBox(
+                                                            width: 5,
+                                                          ),
+                                                          Text('Remove')
                                                         ],
-                                                      );
-                                                    }));
-                                              },
-                                              child: Card(
-                                                  child: Padding(
-                                                padding:
-                                                    const EdgeInsets.all(10.0),
-                                                child: Row(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.center,
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment.center,
-                                                  children: const [
-                                                    Icon(
-                                                      Icons.delete,
-                                                      color: Colors.red,
-                                                    ),
-                                                    SizedBox(
-                                                      width: 5,
-                                                    ),
-                                                    Text('Remove')
-                                                  ],
-                                                ),
-                                              )),
-                                            )),
-                                          ],
-                                        )
+                                                      ),
+                                                    )),
+                                                  )),
+                                                ],
+                                              )
+                                            : const SizedBox.shrink()
                                       ],
                                     );
                                   },
