@@ -113,8 +113,8 @@ class _HomePageState extends State<HomePage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
-                        Row(
-                          children: const [
+                        const Row(
+                          children: [
                             Icon(Icons.location_searching_rounded),
                             SizedBox(
                               width: 10,
@@ -207,8 +207,8 @@ class _HomePageState extends State<HomePage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
-                            Row(
-                              children: const [
+                            const Row(
+                              children: [
                                 Icon(Icons.money_rounded),
                                 SizedBox(
                                   width: 10,
@@ -242,11 +242,11 @@ class _HomePageState extends State<HomePage> {
                                             labelText: 'From',
                                             labelStyle: const TextStyle(
                                                 color: Colors.black87),
-                                            prefixIcon: Row(
+                                            prefixIcon: const Row(
                                               mainAxisSize: MainAxisSize.min,
                                               mainAxisAlignment:
                                                   MainAxisAlignment.center,
-                                              children: const [
+                                              children: [
                                                 Text(
                                                   'Php',
                                                   style: TextStyle(
@@ -312,11 +312,11 @@ class _HomePageState extends State<HomePage> {
                                             labelText: 'To',
                                             labelStyle: const TextStyle(
                                                 color: Colors.black87),
-                                            prefixIcon: Row(
+                                            prefixIcon: const Row(
                                               mainAxisSize: MainAxisSize.min,
                                               mainAxisAlignment:
                                                   MainAxisAlignment.center,
-                                              children: const [
+                                              children: [
                                                 Text(
                                                   'Php',
                                                   style: TextStyle(
@@ -362,21 +362,21 @@ class _HomePageState extends State<HomePage> {
                         const Divider(
                           color: Colors.black,
                         ),
-                        Column(
+                        const Column(
                           mainAxisAlignment: MainAxisAlignment.start,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Center(
+                            Center(
                                 child: Text(
                               'OR',
                               style: TextStyle(
                                   fontSize: 18, fontWeight: FontWeight.w400),
                             )),
-                            const SizedBox(
+                            SizedBox(
                               height: 10,
                             ),
                             Row(
-                              children: const [
+                              children: [
                                 Icon(Icons.search),
                                 SizedBox(
                                   width: 10,

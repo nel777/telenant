@@ -487,10 +487,10 @@ class _ViewMoreState extends State<ViewMore> {
                                                             );
                                                           }));
                                                     },
-                                                    child: Card(
+                                                    child: const Card(
                                                         child: Padding(
                                                       padding:
-                                                          const EdgeInsets.all(
+                                                          EdgeInsets.all(
                                                               10.0),
                                                       child: Row(
                                                         crossAxisAlignment:
@@ -499,7 +499,7 @@ class _ViewMoreState extends State<ViewMore> {
                                                         mainAxisAlignment:
                                                             MainAxisAlignment
                                                                 .center,
-                                                        children: const [
+                                                        children: [
                                                           Icon(
                                                             Icons.delete,
                                                             color: Colors.red,

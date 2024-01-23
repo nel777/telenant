@@ -38,7 +38,7 @@ class _SearchDemoState extends State<SearchDemo> {
           ),
         ],
       ),
-      body: Center(
+      body: const Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
@@ -48,7 +48,7 @@ class _SearchDemoState extends State<SearchDemo> {
                 children: <Widget>[
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: const <Widget>[
+                    children: <Widget>[
                       Text('Press the '),
                       Tooltip(
                         message: 'search',
@@ -60,7 +60,7 @@ class _SearchDemoState extends State<SearchDemo> {
                       Text(' icon in the AppBar'),
                     ],
                   ),
-                  const Text(
+                  Text(
                       'and search for a transient registered in our database.'),
                 ],
               ),
