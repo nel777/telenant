@@ -154,75 +154,100 @@ class _SearchDemoSearchDelegate extends SearchDelegate<List<String>> {
                 )
               : Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: SizedBox(
-                    height: 300,
-                    child: Card(
-                      shape: OutlineInputBorder(
-                          borderSide: const BorderSide(
-                              width: 1.5, color: Colors.blueGrey),
-                          borderRadius: BorderRadius.circular(10)),
-                      child: Column(
-                        children: [
-                          ClipRRect(
-                            borderRadius: const BorderRadius.only(
-                                topRight: Radius.circular(10),
-                                topLeft: Radius.circular(10)),
-                            child: Image.network(
-                              finaldata['cover_page'],
-                              width: 500,
-                              height: 200,
-                              fit: BoxFit.cover,
-                              loadingBuilder: (BuildContext context,
-                                  Widget child,
-                                  ImageChunkEvent? loadingProgress) {
-                                if (loadingProgress == null) {
-                                  return child;
-                                }
-                                return Center(
-                                  child: CircularProgressIndicator(
-                                    value: loadingProgress.expectedTotalBytes !=
-                                            null
-                                        ? loadingProgress
-                                                .cumulativeBytesLoaded /
-                                            loadingProgress.expectedTotalBytes!
-                                        : null,
-                                  ),
-                                );
-                              },
-                            ),
-                          ),
-                          const Divider(),
-                          ListTile(
-                            leading: const Icon(
-                              Icons.place,
-                              color: Colors.blue,
-                            ),
-                            title: Text(finaldata['name'].toString()),
-                            subtitle: Text(finaldata['location'].toString()),
-                            trailing: TextButton(
-                                onPressed: () {
-                                  //print(finaldata!['pricerange']);
-                                  Navigator.of(context).push(MaterialPageRoute(
-                                      builder: ((context) => ViewMore(
-                                              detail: details(
-                                            name: finaldata!['name'],
-                                            location: finaldata['location'],
-                                            coverPage: finaldata['cover_page'],
-                                            bedrooms: finaldata['bedrooms'],
-                                            gallery: finaldata['gallery'],
-                                            // priceRange: PriceRange(
-                                            //     min: finaldata['pricerange']
-                                            //         ['min'],
-                                            //     max: finaldata['pricerange']
-                                            //         ['max']),
-                                            contact: finaldata['contact'],
-                                            type: finaldata['type'],
-                                            website: finaldata['website'],
-                                          )))));
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.of(context).push(MaterialPageRoute(
+                          builder: ((context) => ViewMore(
+                                  detail: details(
+                                name: finaldata!['name'],
+                                location: finaldata['location'],
+                                coverPage: finaldata['cover_page'],
+                                bedrooms: finaldata['bedrooms'],
+                                gallery: finaldata['gallery'],
+                                // priceRange: PriceRange(
+                                //     min: finaldata['pricerange']
+                                //         ['min'],
+                                //     max: finaldata['pricerange']
+                                //         ['max']),
+                                contact: finaldata['contact'],
+                                type: finaldata['type'],
+                                website: finaldata['website'],
+                              )))));
+                    },
+                    child: SizedBox(
+                      height: 300,
+                      child: Card(
+                        shape: OutlineInputBorder(
+                            borderSide: const BorderSide(
+                                width: 1.5, color: Colors.blueGrey),
+                            borderRadius: BorderRadius.circular(10)),
+                        child: Column(
+                          children: [
+                            ClipRRect(
+                              borderRadius: const BorderRadius.only(
+                                  topRight: Radius.circular(10),
+                                  topLeft: Radius.circular(10)),
+                              child: Image.network(
+                                finaldata['cover_page'],
+                                width: double.infinity,
+                                height: 200,
+                                fit: BoxFit.cover,
+                                loadingBuilder: (BuildContext context,
+                                    Widget child,
+                                    ImageChunkEvent? loadingProgress) {
+                                  if (loadingProgress == null) {
+                                    return child;
+                                  }
+                                  return Center(
+                                    child: CircularProgressIndicator(
+                                      value:
+                                          loadingProgress.expectedTotalBytes !=
+                                                  null
+                                              ? loadingProgress
+                                                      .cumulativeBytesLoaded /
+                                                  loadingProgress
+                                                      .expectedTotalBytes!
+                                              : null,
+                                    ),
+                                  );
                                 },
-                                child: const Text('View')),
-                          ),
-                        ],
+                              ),
+                            ),
+                            ListTile(
+                              leading: const Icon(
+                                Icons.place,
+                                color: Colors.blue,
+                              ),
+                              title: Text(
+                                finaldata['name'].toString(),
+                                style: const TextStyle(
+                                    fontSize: 17, fontWeight: FontWeight.bold),
+                              ),
+                              subtitle: Text(finaldata['location'].toString()),
+                              trailing: TextButton(
+                                  onPressed: () {
+                                    //print(finaldata!['pricerange']);
+                                    Navigator.of(context)
+                                        .push(MaterialPageRoute(
+                                            builder: ((context) => ViewMore(
+                                                    detail: details(
+                                                  name: finaldata!['name'],
+                                                  location:
+                                                      finaldata['location'],
+                                                  coverPage:
+                                                      finaldata['cover_page'],
+                                                  bedrooms:
+                                                      finaldata['bedrooms'],
+                                                  gallery: finaldata['gallery'],
+                                                  contact: finaldata['contact'],
+                                                  type: finaldata['type'],
+                                                  website: finaldata['website'],
+                                                )))));
+                                  },
+                                  child: const Text('View')),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),

@@ -2,6 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:telenant/models/chatmodel.dart';
 import 'package:telenant/models/model.dart';
 
+import '../models/RateModel.dart';
+
 class FirebaseFirestoreService {
   FirebaseFirestoreService._();
   static final instance = FirebaseFirestoreService._();
@@ -66,6 +68,17 @@ class FirebaseFirestoreService {
     try {
       return FirebaseFirestore.instance
           .collection("transientDetails")
+          .doc()
+          .set(detail.toJson());
+    } on FirebaseException catch (ex) {
+      throw ex.message.toString();
+    }
+  }
+
+  addRating(RateModel detail) {
+    try {
+      return FirebaseFirestore.instance
+          .collection("ratings")
           .doc()
           .set(detail.toJson());
     } on FirebaseException catch (ex) {

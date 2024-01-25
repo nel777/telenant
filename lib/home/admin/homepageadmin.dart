@@ -115,44 +115,59 @@ class _ViewTransientState extends State<ViewTransient> {
                               width: 0.5, color: Colors.black)),
                       child: Column(
                         children: [
-                          SizedBox(
-                            height: 200,
-                            child: ClipRRect(
-                              borderRadius: const BorderRadius.only(
-                                  topRight: Radius.circular(20.0),
-                                  topLeft: Radius.circular(20.0)),
-                              child: Image.network(
-                                listOfTransients[index].coverPage.toString(),
-                                width: 500,
-                                fit: BoxFit.cover,
-                                loadingBuilder: (BuildContext context,
-                                    Widget child,
-                                    ImageChunkEvent? loadingProgress) {
-                                  if (loadingProgress == null) {
-                                    return child;
-                                  }
-                                  return Center(
-                                    child: CircularProgressIndicator(
-                                      value:
-                                          loadingProgress.expectedTotalBytes !=
-                                                  null
-                                              ? loadingProgress
-                                                      .cumulativeBytesLoaded /
-                                                  loadingProgress
-                                                      .expectedTotalBytes!
-                                              : null,
-                                    ),
-                                  );
-                                },
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.of(context).push(MaterialPageRoute(
+                                  builder: ((context) => ViewMore(
+                                      docId: listOfTransients[index].docId,
+                                      detail: listOfTransients[index]))));
+                            },
+                            child: SizedBox(
+                              height: 200,
+                              child: ClipRRect(
+                                borderRadius: const BorderRadius.only(
+                                    topRight: Radius.circular(20.0),
+                                    topLeft: Radius.circular(20.0)),
+                                child: Image.network(
+                                  listOfTransients[index].coverPage.toString(),
+                                  width: double.infinity,
+                                  fit: BoxFit.cover,
+                                  loadingBuilder: (BuildContext context,
+                                      Widget child,
+                                      ImageChunkEvent? loadingProgress) {
+                                    if (loadingProgress == null) {
+                                      return child;
+                                    }
+                                    return Center(
+                                      child: CircularProgressIndicator(
+                                        value: loadingProgress
+                                                    .expectedTotalBytes !=
+                                                null
+                                            ? loadingProgress
+                                                    .cumulativeBytesLoaded /
+                                                loadingProgress
+                                                    .expectedTotalBytes!
+                                            : null,
+                                      ),
+                                    );
+                                  },
+                                ),
                               ),
                             ),
                           ),
-                          const Divider(),
                           ListTile(
-                            title: Text(
-                              listOfTransients[index].name.toString(),
-                              style: const TextStyle(
-                                  fontSize: 17, fontWeight: FontWeight.bold),
+                            title: GestureDetector(
+                              onTap: () {
+                                Navigator.of(context).push(MaterialPageRoute(
+                                    builder: ((context) => ViewMore(
+                                        docId: listOfTransients[index].docId,
+                                        detail: listOfTransients[index]))));
+                              },
+                              child: Text(
+                                listOfTransients[index].name.toString(),
+                                style: const TextStyle(
+                                    fontSize: 19, fontWeight: FontWeight.bold),
+                              ),
                             ),
                             subtitle: Text(
                                 listOfTransients[index].location.toString()),

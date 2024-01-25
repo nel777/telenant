@@ -27,20 +27,21 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
+  animated_rating_stars: ^1.0.1
   carousel_slider: ^4.1.1
-  cloud_firestore: ^3.4.7
+  cloud_firestore: ^4.14.0
   cupertino_icons: ^1.0.2
-  firebase_auth: ^3.8.0
-  firebase_core: ^1.22.0
-  firebase_storage: ^10.3.8
+  firebase_auth: ^4.16.0
+  firebase_core: ^2.24.2
+  firebase_storage: ^11.6.0
   flutter:
     sdk: flutter
-  image_picker: ^0.8.5+3
+  image_picker: ^1.0.7
   shared_preferences: ^2.0.15
   textfield_search: ^0.10.0
 
 dev_dependencies:
-  flutter_lints: ^2.0.0
+  flutter_lints: ^3.0.1
   flutter_test:
     sdk: flutter
 

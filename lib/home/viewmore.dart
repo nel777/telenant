@@ -6,6 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:telenant/home/rate.dart';
 import 'package:telenant/models/model.dart';
 
 import '../chatmessaging/chatscreen.dart';
@@ -246,7 +247,7 @@ class _ViewMoreState extends State<ViewMore> {
                                 height: widget.detail.managedBy == user!.email
                                     ? 350
                                     : 285,
-                                width: 300,
+                                width: MediaQuery.of(context).size.width,
                                 margin: const EdgeInsets.all(15),
                                 child: CarouselSlider.builder(
                                   itemCount: albums!.length,
@@ -490,8 +491,7 @@ class _ViewMoreState extends State<ViewMore> {
                                                     child: const Card(
                                                         child: Padding(
                                                       padding:
-                                                          EdgeInsets.all(
-                                                              10.0),
+                                                          EdgeInsets.all(10.0),
                                                       child: Row(
                                                         crossAxisAlignment:
                                                             CrossAxisAlignment
@@ -542,15 +542,45 @@ class _ViewMoreState extends State<ViewMore> {
                                                   ))));
                                     },
                                     style: ElevatedButton.styleFrom(
-                                        // /backgroundColor: Colors.,
+                                        backgroundColor: Colors.white30,
                                         fixedSize: Size(
                                             MediaQuery.of(context).size.width -
                                                 16,
                                             45)),
                                     icon:
                                         const Icon(Icons.room_service_rounded),
-                                    label:
-                                        const Text('Book/Reserve Transient')),
+                                    label: const Text(
+                                      'Book/Reserve Transient',
+                                      style: TextStyle(fontSize: 17),
+                                    )),
+                              ),
+                        widget.detail.managedBy == user!.email
+                            ? const SizedBox.shrink()
+                            : Padding(
+                                padding: const EdgeInsets.only(
+                                    left: 8.0, right: 8.0),
+                                child: ElevatedButton.icon(
+                                    onPressed: () {
+                                      Navigator.of(context).push(
+                                          MaterialPageRoute(
+                                              builder: ((context) =>
+                                                  RateService(
+                                                    transient: widget
+                                                        .detail.name
+                                                        .toString(),
+                                                  ))));
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.green[300],
+                                        fixedSize: Size(
+                                            MediaQuery.of(context).size.width -
+                                                16,
+                                            45)),
+                                    icon: const Icon(Icons.star_rate),
+                                    label: const Text(
+                                      'Rate Service',
+                                      style: TextStyle(fontSize: 17),
+                                    )),
                               ),
                       ],
                     )),
