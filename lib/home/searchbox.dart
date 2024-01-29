@@ -144,12 +144,33 @@ class _SearchDemoSearchDelegate extends SearchDelegate<List<String>> {
               finaldata = detail;
             }
           }
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(
+              child: SizedBox(
+                width: 30,
+                height: 30,
+                child: CircularProgressIndicator(
+                  color: Colors.blue,
+                ),
+              ),
+            );
+          }
           return finaldata == null
               ? const Center(
-                  child: SizedBox(
-                    height: 30,
-                    width: 30,
-                    child: CircularProgressIndicator(),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.scatter_plot_rounded,
+                        size: 60,
+                        color: Colors.red,
+                      ),
+                      Text(
+                        'No Transient Has Been Added Yet',
+                        style: TextStyle(fontSize: 20),
+                      )
+                    ],
                   ),
                 )
               : Padding(

@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:animated_rating_stars/animated_rating_stars.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -89,6 +90,7 @@ class _ViewMoreState extends State<ViewMore> {
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Card(
                             elevation: 5.0,
@@ -130,16 +132,106 @@ class _ViewMoreState extends State<ViewMore> {
                                       onTap: () {},
                                       child:
                                           iconText(Icons.web, 'Visit Website')),
-                                  const Divider()
                                 ],
                               ),
                             ),
                           ),
+                          Text('Reviews',
+                              style: TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 28,
+                                  fontWeight: FontWeight.bold)),
+                          SizedBox(
+                            height: 210,
+                            child: FutureBuilder<QuerySnapshot>(
+                                future: FirebaseFirestore.instance
+                                    .collection('ratings')
+                                    .get(),
+                                builder: (context, snapshot) {
+                                  List<DocumentSnapshot> ratings = [];
+                                  if (snapshot.hasData) {
+                                    final List<DocumentSnapshot> listOfRated =
+                                        snapshot.data!.docs;
+                                    listOfRated.forEach((element) {
+                                      if (element['establishment']
+                                              .toString()
+                                              .toLowerCase() ==
+                                          widget.detail.name
+                                              .toString()
+                                              .toLowerCase()) {
+                                        ratings.add(element);
+                                      }
+                                    });
+                                  } else if (snapshot.hasError) {
+                                    return const Center(
+                                      child: Text('Failed to load'),
+                                    );
+                                  }
+                                  return ListView(
+                                    scrollDirection: Axis.horizontal,
+                                    shrinkWrap: true,
+                                    children: ratings
+                                        .map((doc) => Card(
+                                              elevation: 5.0,
+                                              shape: OutlineInputBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(10.0),
+                                              ),
+                                              child: Column(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
+                                                children: [
+                                                  Icon(
+                                                    Icons.person_2_rounded,
+                                                    size: 55,
+                                                  ),
+                                                  Text(doc['user']),
+                                                  AnimatedRatingStars(
+                                                    initialRating:
+                                                        doc['rating'],
+                                                    minRating: 0.0,
+                                                    maxRating: 5.0,
+                                                    filledColor: Colors.amber,
+                                                    emptyColor: Colors.grey,
+                                                    filledIcon: Icons.star,
+                                                    halfFilledIcon:
+                                                        Icons.star_half,
+                                                    emptyIcon:
+                                                        Icons.star_border,
+                                                    onChanged: (double rating) {
+                                                      // Handle the rating change here
+                                                      print('Rating: $rating');
+                                                    },
+                                                    displayRatingValue: true,
+                                                    interactiveTooltips: true,
+                                                    customFilledIcon:
+                                                        Icons.star,
+                                                    customHalfFilledIcon:
+                                                        Icons.star_half,
+                                                    customEmptyIcon:
+                                                        Icons.star_border,
+                                                    starSize: 20.0,
+                                                    animationDuration:
+                                                        const Duration(
+                                                            milliseconds: 300),
+                                                    animationCurve:
+                                                        Curves.easeInOut,
+                                                    readOnly: true,
+                                                  ),
+                                                  Text(doc['comment']),
+                                                ],
+                                              ),
+                                            ))
+                                        .toList(),
+                                  );
+                                }),
+                          ),
                         ],
                       ),
                     )),
+
                 Positioned(
-                    top: 230,
+                    top: 450,
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Column(
@@ -221,7 +313,7 @@ class _ViewMoreState extends State<ViewMore> {
                     )),
 
                 Positioned(
-                    top: 490,
+                    top: 660,
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -554,34 +646,32 @@ class _ViewMoreState extends State<ViewMore> {
                                       style: TextStyle(fontSize: 17),
                                     )),
                               ),
-                        widget.detail.managedBy == user!.email
-                            ? const SizedBox.shrink()
-                            : Padding(
-                                padding: const EdgeInsets.only(
-                                    left: 8.0, right: 8.0),
-                                child: ElevatedButton.icon(
-                                    onPressed: () {
-                                      Navigator.of(context).push(
-                                          MaterialPageRoute(
-                                              builder: ((context) =>
-                                                  RateService(
-                                                    transient: widget
-                                                        .detail.name
-                                                        .toString(),
-                                                  ))));
-                                    },
-                                    style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.green[300],
-                                        fixedSize: Size(
-                                            MediaQuery.of(context).size.width -
-                                                16,
-                                            45)),
-                                    icon: const Icon(Icons.star_rate),
-                                    label: const Text(
-                                      'Rate Service',
-                                      style: TextStyle(fontSize: 17),
-                                    )),
-                              ),
+                        // widget.detail.managedBy == user!.email
+                        //     ? const SizedBox.shrink()
+                        //     :
+                        Padding(
+                          padding: const EdgeInsets.only(left: 8.0, right: 8.0),
+                          child: ElevatedButton.icon(
+                              onPressed: () {
+                                Navigator.of(context).push(MaterialPageRoute(
+                                    builder: ((context) => RateService(
+                                          transient:
+                                              widget.detail.name.toString(),
+                                        ))));
+                              },
+                              style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.green[300],
+                                  fixedSize: Size(
+                                      MediaQuery.of(context).size.width - 16,
+                                      45)),
+                              icon: const Icon(Icons.star_rate),
+                              label: Text(
+                                widget.detail.managedBy != user!.email
+                                    ? 'Rate Service'
+                                    : 'Rate As Admin',
+                                style: TextStyle(fontSize: 17),
+                              )),
+                        ),
                       ],
                     )),
 
@@ -634,7 +724,12 @@ class _ViewMoreState extends State<ViewMore> {
           const SizedBox(
             width: 10,
           ),
-          GestureDetector(onTap: () {}, child: Text(text))
+          GestureDetector(
+              onTap: () {},
+              child: Text(
+                text,
+                style: TextStyle(fontSize: 19),
+              ))
         ],
       ),
     );

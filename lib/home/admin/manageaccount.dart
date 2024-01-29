@@ -205,72 +205,72 @@ class _ManageAccountState extends State<ManageAccount> {
               // const SizedBox(
               //   height: 30,
               // ),
-              const Divider(
-                height: 30,
-                thickness: 1.5,
-              ),
-              InputDecorator(
-                  decoration: InputDecoration(
-                    labelText: 'Feedbacks',
-                    labelStyle: const TextStyle(
-                        fontSize: 23, fontWeight: FontWeight.bold),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10.0),
-                    ),
-                  ),
-                  child: StreamBuilder<QuerySnapshot>(
-                      stream: FirebaseFirestoreService.instance.readFeedbacks(),
-                      builder: ((context, snapshot) {
-                        List<QueryDocumentSnapshot> feedbacks = [];
-                        if (snapshot.hasData) {
-                          for (final transient in snapshot.data!.docs) {
-                            if (transient['managedBy'] ==
-                                FirebaseAuth.instance.currentUser!.email) {
-                              feedbacks.add(transient);
-                            }
-                          }
-                        }
-                        return ListView.builder(
-                            itemCount: feedbacks.length,
-                            physics: const NeverScrollableScrollPhysics(),
-                            shrinkWrap: true,
-                            itemBuilder: ((context, index) {
-                              return Card(
-                                elevation: 5.0,
-                                child: Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Column(
-                                    children: [
-                                      ListTile(
-                                        leading: const Icon(
-                                          Icons.star,
-                                          color: Colors.yellow,
-                                        ),
-                                        title:
-                                            Text(feedbacks[index]['managedBy']),
-                                        subtitle:
-                                            Text(feedbacks[index]['feedback']),
-                                      ),
-                                      const SizedBox(
-                                        height: 5,
-                                      ),
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.end,
-                                        children: [
-                                          const Icon(
-                                            Icons.verified_user_outlined,
-                                            color: Colors.green,
-                                          ),
-                                          Text(feedbacks[index]['by']),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            }));
-                      }))),
+              // const Divider(
+              //   height: 30,
+              //   thickness: 1.5,
+              // ),
+              // InputDecorator(
+              //     decoration: InputDecoration(
+              //       labelText: 'Feedbacks',
+              //       labelStyle: const TextStyle(
+              //           fontSize: 23, fontWeight: FontWeight.bold),
+              //       border: OutlineInputBorder(
+              //         borderRadius: BorderRadius.circular(10.0),
+              //       ),
+              //     ),
+              //     child: StreamBuilder<QuerySnapshot>(
+              //         stream: FirebaseFirestoreService.instance.readFeedbacks(),
+              //         builder: ((context, snapshot) {
+              //           List<QueryDocumentSnapshot> feedbacks = [];
+              //           if (snapshot.hasData) {
+              //             for (final transient in snapshot.data!.docs) {
+              //               if (transient['managedBy'] ==
+              //                   FirebaseAuth.instance.currentUser!.email) {
+              //                 feedbacks.add(transient);
+              //               }
+              //             }
+              //           }
+              //           return ListView.builder(
+              //               itemCount: feedbacks.length,
+              //               physics: const NeverScrollableScrollPhysics(),
+              //               shrinkWrap: true,
+              //               itemBuilder: ((context, index) {
+              //                 return Card(
+              //                   elevation: 5.0,
+              //                   child: Padding(
+              //                     padding: const EdgeInsets.all(8.0),
+              //                     child: Column(
+              //                       children: [
+              //                         ListTile(
+              //                           leading: const Icon(
+              //                             Icons.star,
+              //                             color: Colors.yellow,
+              //                           ),
+              //                           title:
+              //                               Text(feedbacks[index]['managedBy']),
+              //                           subtitle:
+              //                               Text(feedbacks[index]['feedback']),
+              //                         ),
+              //                         const SizedBox(
+              //                           height: 5,
+              //                         ),
+              //                         Row(
+              //                           mainAxisAlignment:
+              //                               MainAxisAlignment.end,
+              //                           children: [
+              //                             const Icon(
+              //                               Icons.verified_user_outlined,
+              //                               color: Colors.green,
+              //                             ),
+              //                             Text(feedbacks[index]['by']),
+              //                           ],
+              //                         ),
+              //                       ],
+              //                     ),
+              //                   ),
+              //                 );
+              //               }));
+              //         }))),
             ],
           ),
         ),
