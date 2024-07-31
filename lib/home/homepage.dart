@@ -19,6 +19,7 @@ class _HomePageState extends State<HomePage> {
   String _selectedValue = 'Near Town';
   int min = 200;
   int max = 10000;
+  int currentPageIndex = 0;
   List propertyTypes = [];
   List<String> listOfPriceValue = [
     '200',
@@ -92,384 +93,459 @@ class _HomePageState extends State<HomePage> {
           //     ))
         ],
       ),
+      bottomNavigationBar: NavigationBar(
+        onDestinationSelected: (int index) {
+          setState(() {
+            currentPageIndex = index;
+          });
+        },
+        indicatorColor: Theme.of(context).colorScheme.primaryContainer,
+        selectedIndex: currentPageIndex,
+        destinations: const <Widget>[
+          NavigationDestination(
+            selectedIcon: Icon(Icons.home),
+            icon: Icon(Icons.home_outlined),
+            label: 'Home',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.account_circle_rounded),
+            label: 'Profile',
+          ),
+        ],
+      ),
       body: SingleChildScrollView(
           //controller: _scrollController,
-          child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: StreamBuilder<QuerySnapshot>(
-                stream: FirebaseFirestoreService.instance.readItems(),
-                builder: ((context, snapshot) {
-                  List<String> listOfValue = ['Near Town'];
-                  List<String> listOfTransient = [];
-                  if (snapshot.hasData) {
-                    for (final detail in snapshot.data!.docs) {
-                      listOfValue.add(detail['location']);
-                      listOfTransient.add(detail['name']);
-                    }
-                  }
-                  return SizedBox(
-                    height: MediaQuery.of(context).size.height,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        const Row(
-                          children: [
-                            Icon(Icons.location_searching_rounded),
-                            SizedBox(
-                              width: 10,
-                            ),
-                            Text(
-                              'Available Locations',
-                              style: TextStyle(
-                                  fontSize: 25, fontWeight: FontWeight.bold),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(
-                          height: 15,
-                        ),
-                        DropdownButtonFormField(
-                            decoration: InputDecoration(
-                                // enabledBorder: const OutlineInputBorder(
-                                //     borderSide: BorderSide(color: Colors.black38)),
-                                //fillColor: Colors.black12,
-                                focusedBorder: const OutlineInputBorder(
-                                    borderSide:
-                                        BorderSide(color: Colors.black38)),
-                                contentPadding: const EdgeInsets.all(10.0),
-                                labelText: 'Select Location',
-                                labelStyle:
-                                    const TextStyle(color: Colors.black87),
-                                prefixIcon: const Icon(
-                                  Icons.pin_drop_rounded,
-                                  color: Colors.blue,
-                                ),
-                                border: OutlineInputBorder(
-                                    borderSide: const BorderSide(
-                                        width: 1.5, color: Colors.black38),
-                                    borderRadius: BorderRadius.circular(10.0))),
-                            value: _selectedValue,
-                            isExpanded: true,
-                            items: listOfValue.map((String val) {
-                              return DropdownMenuItem(
-                                value: val,
-                                child: Row(
-                                  children: [
-                                    Text(
-                                      val,
-                                    ),
-                                  ],
-                                ),
-                              );
-                            }).toList(),
-                            onChanged: (value) {
-                              print(value);
-                              setState(() {
-                                _selectedValue = value.toString();
-                              });
-                            }),
-
-                        const SizedBox(
-                          height: 20,
-                        ),
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Property Types',
-                              style: TextStyle(
-                                  fontSize: 25, fontWeight: FontWeight.bold),
-                            ),
-                            const SizedBox(
-                              height: 10,
-                            ),
-                            SingleChildScrollView(
-                              scrollDirection: Axis.horizontal,
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  propertyType(Icons.apartment, 'Apartment'),
-                                  propertyType(Icons.house, 'Townhouse'),
-                                  // propertyType(
-                                  //     Icons.view_timeline_rounded, 'Any'),
-                                ],
-                              ),
-                            )
-                          ],
-                        ),
-                        const Divider(
-                          color: Colors.black,
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            const Row(
-                              children: [
-                                Icon(Icons.money_rounded),
-                                SizedBox(
-                                  width: 10,
-                                ),
-                                Text(
-                                  'Price Range',
-                                  style: TextStyle(
-                                      fontSize: 25,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                              ],
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.only(top: 16.0),
-                              child: Row(
-                                children: [
-                                  SizedBox(
-                                    width:
-                                        MediaQuery.of(context).size.width / 2.5,
-                                    child: DropdownButtonFormField(
-                                        decoration: InputDecoration(
-                                            // enabledBorder: const OutlineInputBorder(
-                                            //     borderSide: BorderSide(color: Colors.black38)),
-                                            //fillColor: Colors.black12,
-                                            focusedBorder:
-                                                const OutlineInputBorder(
-                                                    borderSide: BorderSide(
-                                                        color: Colors.black38)),
-                                            contentPadding:
-                                                const EdgeInsets.all(10.0),
-                                            labelText: 'From',
-                                            labelStyle: const TextStyle(
-                                                color: Colors.black87),
-                                            prefixIcon: const Row(
-                                              mainAxisSize: MainAxisSize.min,
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                              children: [
-                                                Text(
-                                                  'Php',
-                                                  style: TextStyle(
-                                                    color: Colors.black,
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                            border: OutlineInputBorder(
-                                                borderSide: const BorderSide(
-                                                    width: 1.5,
-                                                    color: Colors.black38),
-                                                borderRadius:
-                                                    BorderRadius.circular(
-                                                        10.0))),
-                                        value: '300',
-                                        isExpanded: true,
-                                        items:
-                                            listOfPriceValue.map((String val) {
-                                          return DropdownMenuItem(
-                                            value: val,
-                                            child: Row(
-                                              children: [
-                                                Text(
-                                                  val,
-                                                ),
-                                              ],
-                                            ),
-                                          );
-                                        }).toList(),
-                                        onChanged: (value) {
-                                          setState(() {
-                                            min = int.parse(value.toString());
-                                          });
-                                        }),
-                                  ),
-                                  const Padding(
-                                    padding:
-                                        EdgeInsets.only(left: 8.0, right: 8.0),
-                                    child: Text(
-                                      '-',
-                                      style: TextStyle(
-                                          fontSize: 30,
-                                          fontWeight: FontWeight.w400,
-                                          color: Colors.black26),
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    width:
-                                        MediaQuery.of(context).size.width / 2.5,
-                                    child: DropdownButtonFormField(
-                                        decoration: InputDecoration(
-                                            // enabledBorder: const OutlineInputBorder(
-                                            //     borderSide: BorderSide(color: Colors.black38)),
-                                            //fillColor: Colors.black12,
-                                            focusedBorder:
-                                                const OutlineInputBorder(
-                                                    borderSide: BorderSide(
-                                                        color: Colors.black38)),
-                                            contentPadding:
-                                                const EdgeInsets.all(10.0),
-                                            labelText: 'To',
-                                            labelStyle: const TextStyle(
-                                                color: Colors.black87),
-                                            prefixIcon: const Row(
-                                              mainAxisSize: MainAxisSize.min,
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                              children: [
-                                                Text(
-                                                  'Php',
-                                                  style: TextStyle(
-                                                    color: Colors.black,
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                            border: OutlineInputBorder(
-                                                borderSide: const BorderSide(
-                                                    width: 1.5,
-                                                    color: Colors.black38),
-                                                borderRadius:
-                                                    BorderRadius.circular(
-                                                        10.0))),
-                                        value: '300',
-                                        isExpanded: true,
-                                        items:
-                                            listOfPriceValue.map((String val) {
-                                          return DropdownMenuItem(
-                                            value: val,
-                                            child: Row(
-                                              children: [
-                                                Text(
-                                                  val,
-                                                ),
-                                              ],
-                                            ),
-                                          );
-                                        }).toList(),
-                                        onChanged: (value) {
-                                          setState(() {
-                                            max = int.parse(value.toString());
-                                          });
-                                        }),
-                                  ),
-                                ],
-                              ),
-                            )
-                          ],
-                        ),
-                        const Divider(
-                          color: Colors.black,
-                        ),
-                        const Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Center(
-                                child: Text(
-                              'OR',
-                              style: TextStyle(
-                                  fontSize: 18, fontWeight: FontWeight.w400),
-                            )),
-                            SizedBox(
-                              height: 10,
-                            ),
-                            Row(
-                              children: [
-                                Icon(Icons.search),
-                                SizedBox(
-                                  width: 10,
-                                ),
-                                Text(
-                                  'Search by Name',
-                                  style: TextStyle(
-                                      fontSize: 25,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                        const SizedBox(
-                          height: 5,
-                        ),
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.of(context).push(MaterialPageRoute(
-                                builder: ((context) => Material(
-                                      child: SearchDemo(
-                                        data: listOfTransient,
-                                      ),
-                                    ))));
-                          },
-                          child: TextFieldSearch(
-                            label: 'Search',
-
-                            // minStringLength: -1,
-                            controller: searchController,
-                            initialList: listOfTransient,
-                            decoration: const InputDecoration(
-                                enabled: false,
-                                contentPadding: EdgeInsets.all(15),
-                                hintText: 'type in the transient name',
-                                hintStyle: TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 18,
-                                  fontStyle: FontStyle.italic,
-                                ),
-                                border: OutlineInputBorder()),
-                          ),
-                        ),
-                        // TextField(
-                        //   controller: searchController,
-                        //   decoration: const InputDecoration(
-                        //       contentPadding: EdgeInsets.all(15),
-                        //       hintText: 'type in the transient name',
-                        //       hintStyle: TextStyle(
-                        //         color: Colors.black,
-                        //         fontSize: 18,
-                        //         fontStyle: FontStyle.italic,
-                        //       ),
-                        //       border: OutlineInputBorder()),
-                        // ),
-                        const SizedBox(
-                          height: 50,
-                        ),
-                        ElevatedButton.icon(
-                            icon: const Icon(Icons.arrow_forward_ios_rounded),
-                            style: ElevatedButton.styleFrom(
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(20)),
-                                fixedSize: const Size(double.maxFinite, 40)),
-                            onPressed: () {
-                              Map<String, int> pricerange = {
-                                'min': min,
-                                'max': max,
-                              };
-                              Map<String, dynamic> filtered = {
-                                'type': propertyTypes,
-                                'location': _selectedValue,
-                                'price': pricerange
-                              };
-                              //print(filtered['price']['min']);
-                              //filtered.add(propertyTypes);
-                              Navigator.of(context).push(MaterialPageRoute(
-                                  builder: ((context) => ShowFiltered(
-                                        filtered: filtered,
-                                      ))));
-                              // print(propertyTypes);
-                              // print(_selectedValue);
-                              // print(min);
-                              // print(max);
-                            },
-                            label: const Text('Proceed')),
-                      ],
-                    ),
-                  );
-                }),
-              ))),
+          child: currentPageIndex == 0 ? homeWidget() : profileWidget()),
     );
+  }
+
+  //a column of profile page that displays id number and email, reading from the function readUserDetails
+  Padding profileWidget() {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          const SizedBox(
+            height: 20,
+          ),
+          const Text(
+            'Profile',
+            style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(
+            height: 20,
+          ),
+          FutureBuilder<DocumentSnapshot>(
+            future: FirebaseFirestoreService.instance
+                .getUserDetails(FirebaseAuth.instance.currentUser!.uid),
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                Map<String, dynamic> data =
+                    snapshot.data!.data() as Map<String, dynamic>;
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Text(
+                      'ID Number: ${data['idNumber']}',
+                      style: const TextStyle(fontSize: 18),
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    Text(
+                      'Email: ${data['email']}',
+                      style: const TextStyle(fontSize: 18),
+                    ),
+                  ],
+                );
+              } else if (snapshot.hasError) {
+                return Center(child: Text('Error: ${snapshot.error}'));
+              } else {
+                return const Center(child: CircularProgressIndicator());
+              }
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  //create a column of home page that displays the list of transients, use streambuilder
+  //create a card for each transient, display name, location, price, and image
+  //create a button for each transient that navigates to the details page
+  //create a search bar that filters the list of transients
+  //create a filter button that navigates to the filter page
+  //create a button that navigates to the profile page
+  //create a button that logs out the user
+  //create a button that navigates to the chat page
+  //create a button that navigates to the feedback page
+  //create a button that navigates to the rating page
+
+  Padding homeWidget() {
+    return Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: StreamBuilder<QuerySnapshot>(
+          stream: FirebaseFirestoreService.instance.readItems(),
+          builder: ((context, snapshot) {
+            List<String> listOfValue = ['Near Town'];
+            List<String> listOfTransient = [];
+            if (snapshot.hasData) {
+              for (final detail in snapshot.data!.docs) {
+                listOfValue.add(detail['location']);
+                listOfTransient.add(detail['name']);
+              }
+            }
+            return SizedBox(
+              height: MediaQuery.of(context).size.height,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  const Row(
+                    children: [
+                      Icon(Icons.location_searching_rounded),
+                      SizedBox(
+                        width: 10,
+                      ),
+                      Text(
+                        'Available Locations',
+                        style: TextStyle(
+                            fontSize: 25, fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(
+                    height: 15,
+                  ),
+                  DropdownButtonFormField(
+                      decoration: InputDecoration(
+                          // enabledBorder: const OutlineInputBorder(
+                          //     borderSide: BorderSide(color: Colors.black38)),
+                          //fillColor: Colors.black12,
+                          focusedBorder: const OutlineInputBorder(
+                              borderSide: BorderSide(color: Colors.black38)),
+                          contentPadding: const EdgeInsets.all(10.0),
+                          labelText: 'Select Location',
+                          labelStyle: const TextStyle(color: Colors.black87),
+                          prefixIcon: const Icon(
+                            Icons.pin_drop_rounded,
+                            color: Colors.blue,
+                          ),
+                          border: OutlineInputBorder(
+                              borderSide: const BorderSide(
+                                  width: 1.5, color: Colors.black38),
+                              borderRadius: BorderRadius.circular(10.0))),
+                      value: _selectedValue,
+                      isExpanded: true,
+                      items: listOfValue.map((String val) {
+                        return DropdownMenuItem(
+                          value: val,
+                          child: Row(
+                            children: [
+                              Text(
+                                val,
+                              ),
+                            ],
+                          ),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        print(value);
+                        setState(() {
+                          _selectedValue = value.toString();
+                        });
+                      }),
+
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Property Types',
+                        style: TextStyle(
+                            fontSize: 25, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            propertyType(Icons.apartment, 'Apartment'),
+                            propertyType(Icons.house, 'Townhouse'),
+                            // propertyType(
+                            //     Icons.view_timeline_rounded, 'Any'),
+                          ],
+                        ),
+                      )
+                    ],
+                  ),
+                  const Divider(
+                    color: Colors.black,
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      const Row(
+                        children: [
+                          Icon(Icons.money_rounded),
+                          SizedBox(
+                            width: 10,
+                          ),
+                          Text(
+                            'Price Range',
+                            style: TextStyle(
+                                fontSize: 25, fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 16.0),
+                        child: Row(
+                          children: [
+                            SizedBox(
+                              width: MediaQuery.of(context).size.width / 2.5,
+                              child: DropdownButtonFormField(
+                                  decoration: InputDecoration(
+                                      // enabledBorder: const OutlineInputBorder(
+                                      //     borderSide: BorderSide(color: Colors.black38)),
+                                      //fillColor: Colors.black12,
+                                      focusedBorder: const OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                              color: Colors.black38)),
+                                      contentPadding:
+                                          const EdgeInsets.all(10.0),
+                                      labelText: 'From',
+                                      labelStyle: const TextStyle(
+                                          color: Colors.black87),
+                                      prefixIcon: const Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Text(
+                                            'Php',
+                                            style: TextStyle(
+                                              color: Colors.black,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      border: OutlineInputBorder(
+                                          borderSide: const BorderSide(
+                                              width: 1.5,
+                                              color: Colors.black38),
+                                          borderRadius:
+                                              BorderRadius.circular(10.0))),
+                                  value: '300',
+                                  isExpanded: true,
+                                  items: listOfPriceValue.map((String val) {
+                                    return DropdownMenuItem(
+                                      value: val,
+                                      child: Row(
+                                        children: [
+                                          Text(
+                                            val,
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  }).toList(),
+                                  onChanged: (value) {
+                                    setState(() {
+                                      min = int.parse(value.toString());
+                                    });
+                                  }),
+                            ),
+                            const Padding(
+                              padding: EdgeInsets.only(left: 8.0, right: 8.0),
+                              child: Text(
+                                '-',
+                                style: TextStyle(
+                                    fontSize: 30,
+                                    fontWeight: FontWeight.w400,
+                                    color: Colors.black26),
+                              ),
+                            ),
+                            SizedBox(
+                              width: MediaQuery.of(context).size.width / 2.5,
+                              child: DropdownButtonFormField(
+                                  decoration: InputDecoration(
+                                      // enabledBorder: const OutlineInputBorder(
+                                      //     borderSide: BorderSide(color: Colors.black38)),
+                                      //fillColor: Colors.black12,
+                                      focusedBorder: const OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                              color: Colors.black38)),
+                                      contentPadding:
+                                          const EdgeInsets.all(10.0),
+                                      labelText: 'To',
+                                      labelStyle: const TextStyle(
+                                          color: Colors.black87),
+                                      prefixIcon: const Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Text(
+                                            'Php',
+                                            style: TextStyle(
+                                              color: Colors.black,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      border: OutlineInputBorder(
+                                          borderSide: const BorderSide(
+                                              width: 1.5,
+                                              color: Colors.black38),
+                                          borderRadius:
+                                              BorderRadius.circular(10.0))),
+                                  value: '300',
+                                  isExpanded: true,
+                                  items: listOfPriceValue.map((String val) {
+                                    return DropdownMenuItem(
+                                      value: val,
+                                      child: Row(
+                                        children: [
+                                          Text(
+                                            val,
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  }).toList(),
+                                  onChanged: (value) {
+                                    setState(() {
+                                      max = int.parse(value.toString());
+                                    });
+                                  }),
+                            ),
+                          ],
+                        ),
+                      )
+                    ],
+                  ),
+                  const Divider(
+                    color: Colors.black,
+                  ),
+                  const Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Center(
+                          child: Text(
+                        'OR',
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.w400),
+                      )),
+                      SizedBox(
+                        height: 10,
+                      ),
+                      Row(
+                        children: [
+                          Icon(Icons.search),
+                          SizedBox(
+                            width: 10,
+                          ),
+                          Text(
+                            'Search by Name',
+                            style: TextStyle(
+                                fontSize: 25, fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  const SizedBox(
+                    height: 5,
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.of(context).push(MaterialPageRoute(
+                          builder: ((context) => Material(
+                                child: SearchDemo(
+                                  data: listOfTransient,
+                                ),
+                              ))));
+                    },
+                    child: TextFieldSearch(
+                      label: 'Search',
+
+                      // minStringLength: -1,
+                      controller: searchController,
+                      initialList: listOfTransient,
+                      decoration: const InputDecoration(
+                          enabled: false,
+                          contentPadding: EdgeInsets.all(15),
+                          hintText: 'type in the transient name',
+                          hintStyle: TextStyle(
+                            color: Colors.black,
+                            fontSize: 18,
+                            fontStyle: FontStyle.italic,
+                          ),
+                          border: OutlineInputBorder()),
+                    ),
+                  ),
+                  // TextField(
+                  //   controller: searchController,
+                  //   decoration: const InputDecoration(
+                  //       contentPadding: EdgeInsets.all(15),
+                  //       hintText: 'type in the transient name',
+                  //       hintStyle: TextStyle(
+                  //         color: Colors.black,
+                  //         fontSize: 18,
+                  //         fontStyle: FontStyle.italic,
+                  //       ),
+                  //       border: OutlineInputBorder()),
+                  // ),
+                  const SizedBox(
+                    height: 50,
+                  ),
+                  ElevatedButton.icon(
+                      icon: const Icon(Icons.arrow_forward_ios_rounded),
+                      style: ElevatedButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20)),
+                          fixedSize: const Size(double.maxFinite, 40)),
+                      onPressed: () {
+                        Map<String, int> pricerange = {
+                          'min': min,
+                          'max': max,
+                        };
+                        Map<String, dynamic> filtered = {
+                          'type': propertyTypes,
+                          'location': _selectedValue,
+                          'price': pricerange
+                        };
+                        //print(filtered['price']['min']);
+                        //filtered.add(propertyTypes);
+                        Navigator.of(context).push(MaterialPageRoute(
+                            builder: ((context) => ShowFiltered(
+                                  filtered: filtered,
+                                ))));
+                        // print(propertyTypes);
+                        // print(_selectedValue);
+                        // print(min);
+                        // print(max);
+                      },
+                      label: const Text('Proceed')),
+                ],
+              ),
+            );
+          }),
+        ));
   }
 
   Padding propertyType(IconData icon, String type) {

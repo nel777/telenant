@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:telenant/models/chatmodel.dart';
 import 'package:telenant/models/model.dart';
@@ -81,6 +83,39 @@ class FirebaseFirestoreService {
           .collection("ratings")
           .doc()
           .set(detail.toJson());
+    } on FirebaseException catch (ex) {
+      throw ex.message.toString();
+    }
+  }
+
+  addUserDetails(
+      {required String uid,
+      required String idType,
+      required String idNumber,
+      required String email}) {
+    Map<String, dynamic> data = {
+      "uid": uid,
+      "idType": idType,
+      "idNumber": idNumber,
+      "email": email
+    };
+    try {
+      return FirebaseFirestore.instance
+          .collection("userDetails")
+          .doc(uid)
+          .set(data);
+    } on FirebaseException catch (ex) {
+      throw ex.message.toString();
+    }
+  }
+
+  //create a function that returns the data of userdetails based on passed uid
+  Future<DocumentSnapshot<Object?>> getUserDetails(String uid) async {
+    try {
+      return await FirebaseFirestore.instance
+          .collection("userDetails")
+          .doc(uid)
+          .get();
     } on FirebaseException catch (ex) {
       throw ex.message.toString();
     }
