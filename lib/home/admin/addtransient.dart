@@ -325,8 +325,11 @@ class _AddTransientState extends State<AddTransient> {
         ),
         TextFormField(
           controller: controller,
+          readOnly: name == 'Location' ? true : false,
           decoration: InputDecoration(
-              contentPadding: EdgeInsets.all(10),
+              hintText:
+                  name == 'Location' ? 'To select press the pin button' : null,
+              contentPadding: const EdgeInsets.all(10),
               suffixIcon: name == 'Location'
                   ? IconButton(
                       onPressed: () {

@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:location/location.dart';
 import 'package:telenant/FirebaseServices/services.dart';
-import 'package:telenant/models/model.dart';
 
 Future<List<Map<String, dynamic>>> findNearbyApartments(
     LocationData userPosition, double maxDistanceInMeters) async {

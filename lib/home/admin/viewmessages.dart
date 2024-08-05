@@ -31,7 +31,6 @@ class _ViewMessagesState extends State<ViewMessages> {
           List<QueryDocumentSnapshot> messages = [];
           List<Map<String, dynamic>> emails = [];
           List<dynamic> result = [];
-          List<Map<String, dynamic>> finalList = [];
           if (snapshot.hasData) {
             for (final message in snapshot.data!.docs) {
               messages.add(message);
