@@ -28,6 +28,7 @@ environment:
 # versions available, run `flutter pub outdated`.
 dependencies:
   animated_rating_stars: ^1.0.1
+  cached_network_image: ^3.4.0
   carousel_slider: ^4.1.1
   cloud_firestore: ^5.2.0
   cupertino_icons: ^1.0.2
@@ -36,7 +37,12 @@ dependencies:
   firebase_storage: ^12.1.2
   flutter:
     sdk: flutter
+  geocoding: ^3.0.0
+  geolocator: ^12.0.0
   image_picker: ^1.0.7
+  latlng: ^2.0.7
+  location: ^7.0.0
+  map: ^2.0.2
   shared_preferences: ^2.0.15
   textfield_search: ^0.11.1
 

@@ -221,11 +221,11 @@ class _RegisterPageState extends State<RegisterPage> {
                     }
                   },
                   child: loading
-                      ? const SizedBox(
+                      ? SizedBox(
                           height: 25,
                           width: 25,
                           child: CircularProgressIndicator(
-                            color: Colors.white,
+                            color: Theme.of(context).primaryColor,
                           ),
                         )
                       : const Text('Register')),

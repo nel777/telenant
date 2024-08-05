@@ -4,6 +4,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:latlng/latlng.dart';
+import 'package:telenant/home/admin/gmap/map.dart';
 import 'package:telenant/models/model.dart';
 
 import '../../FirebaseServices/services.dart';
@@ -21,6 +23,7 @@ class _AddTransientState extends State<AddTransient> {
   ImagePicker picker = ImagePicker();
   bool loading = false;
   XFile? imagecover;
+  LocationLatLng? locationLatLng;
   List<XFile>? imagealbum;
   User? user = FirebaseAuth.instance.currentUser;
   final TextEditingController _transient = TextEditingController();
@@ -76,7 +79,7 @@ class _AddTransientState extends State<AddTransient> {
               Row(
                 //mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  priceRange('Price Range', _min, _max),
+                  priceRange('Price Range Per Head', _min, _max),
                   const SizedBox(
                     width: 10,
                   ),
@@ -116,11 +119,13 @@ class _AddTransientState extends State<AddTransient> {
                           min: int.parse(_min.text),
                           max: int.parse(_max.text),
                         ),
+                        locationLatLng: locationLatLng,
                         coverPage: cover.toString(),
                         gallery: album,
                         managedBy: user!.email.toString(),
                       );
-                      FirebaseFirestoreService.instance.addTransient(detail);
+                      await FirebaseFirestoreService.instance
+                          .addTransient(detail);
                       setState(() {
                         loading = false;
                       });
@@ -128,8 +133,7 @@ class _AddTransientState extends State<AddTransient> {
                           context: context,
                           builder: (context) => AlertDialog(
                                 title: const Text('Success'),
-                                content:
-                                    const Text('Files uploaded successfully'),
+                                content: const Text('Uploaded successfully'),
                                 actions: <Widget>[
                                   ElevatedButton(
                                     child: const Text('Ok'),
@@ -321,13 +325,41 @@ class _AddTransientState extends State<AddTransient> {
         ),
         TextFormField(
           controller: controller,
-          decoration: const InputDecoration(
+          decoration: InputDecoration(
               contentPadding: EdgeInsets.all(10),
+              suffixIcon: name == 'Location'
+                  ? IconButton(
+                      onPressed: () {
+                        _selectLocation(context);
+                      },
+                      icon: Icon(Icons.pin_drop_rounded))
+                  : null,
               border: OutlineInputBorder(
                   borderSide: BorderSide(color: Colors.black54))),
         )
       ],
     );
+  }
+
+  Future<void> _selectLocation(BuildContext context) async {
+    final result = await Navigator.of(context).push<Map<String, dynamic>>(
+      MaterialPageRoute(
+        builder: (context) => const InteractiveMapPage(),
+      ),
+    );
+
+    if (result != null) {
+      // Process the returned data
+      print(result.toString());
+      LatLng location = result['locationLatLng'];
+      setState(() {
+        _location.text = result['locationText'];
+        locationLatLng = LocationLatLng(
+          latitude: location.latitude.degrees,
+          longitude: location.longitude.degrees,
+        );
+      });
+    }
   }
 
   Column priceRange(

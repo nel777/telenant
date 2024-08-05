@@ -5,6 +5,7 @@ class details {
   String? coverPage;
   String? bedrooms;
   PriceRange? priceRange;
+  LocationLatLng? locationLatLng;
   List<dynamic>? gallery;
   String? contact;
   String? type;
@@ -18,6 +19,7 @@ class details {
       this.coverPage,
       this.bedrooms,
       this.priceRange,
+      this.locationLatLng,
       this.gallery,
       this.contact,
       this.type,
@@ -32,6 +34,9 @@ class details {
     bedrooms = json['bedrooms'];
     priceRange = (json['price_range'] != null
         ? PriceRange.fromJson(json['price_range'])
+        : null)!;
+    locationLatLng = (json['location_latlng'] != null
+        ? LocationLatLng.fromJson(json['location_latlng'])
         : null)!;
     gallery = json['gallery'];
     contact = json['contact'];
@@ -49,6 +54,9 @@ class details {
     data['bedrooms'] = bedrooms;
     if (priceRange != null) {
       data['price_range'] = priceRange!.toJson();
+    }
+    if (locationLatLng != null) {
+      data['location_latlng'] = locationLatLng!.toJson();
     }
     data['gallery'] = gallery;
     data['contact'] = contact;
@@ -75,6 +83,25 @@ class PriceRange {
     final Map<String, dynamic> data = <String, dynamic>{};
     data['min'] = min;
     data['max'] = max;
+    return data;
+  }
+}
+
+class LocationLatLng {
+  double? latitude;
+  double? longitude;
+
+  LocationLatLng({this.latitude, this.longitude});
+
+  LocationLatLng.fromJson(Map<String, dynamic> json) {
+    latitude = json['latitude'];
+    longitude = json['longitude'];
+  }
+
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> data = <String, dynamic>{};
+    data['latitude'] = latitude;
+    data['longitude'] = longitude;
     return data;
   }
 }

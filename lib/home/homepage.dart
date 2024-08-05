@@ -1,11 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:location/location.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:telenant/FirebaseServices/services.dart';
 import 'package:telenant/authentication/login.dart';
+import 'package:telenant/home/components/near_me_widgets.dart';
 import 'package:telenant/home/filtered.dart';
 import 'package:telenant/home/searchbox.dart';
+import 'package:telenant/utils/filter_transients.dart';
 import 'package:textfield_search/textfield_search.dart';
 
 class HomePage extends StatefulWidget {
@@ -20,6 +24,7 @@ class _HomePageState extends State<HomePage> {
   int min = 200;
   int max = 10000;
   int currentPageIndex = 0;
+  late Future<List<Map<String, dynamic>>> _nearbyApartments;
   List propertyTypes = [];
   List<String> listOfPriceValue = [
     '200',
@@ -32,20 +37,57 @@ class _HomePageState extends State<HomePage> {
     '5000',
     '10000'
   ];
-  //List dummyList = ['Item 1', 'Item 2', 'Item 3', 'Item 4', 'Item 5'];
-  TextEditingController searchController = TextEditingController();
-  //final ScrollController _scrollController = ScrollController();
+  late TextEditingController searchController;
+  bool fetchingLocation = false;
 
   @override
-  void dispose() {
-    searchController.dispose();
-    super.dispose();
+  void initState() {
+    super.initState();
+    searchController = TextEditingController();
   }
+
+  // @override
+  // void dispose() {
+  //   searchController.dispose();
+  //   super.dispose();
+  // }
 
   void logout() async {
     await FirebaseAuth.instance.signOut();
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.remove('userEmail');
+  }
+
+  Future<void> _fetchNearbyApartments(LocationData location) async {
+    try {
+      _nearbyApartments = findNearbyApartments(location,
+          100000); //km-m; 1000m = 1km; therefore here it is set to 100km radius
+      _nearbyApartments.then((value) {
+        Navigator.of(context).push(MaterialPageRoute(builder: (context) {
+          return NearMeWidget(
+            data: value,
+          );
+        }));
+        setState(() {
+          fetchingLocation = false;
+        });
+      }).onError((error, stackTrace) {
+        showDialog(
+            context: context,
+            builder: (context) {
+              return AlertDialog(
+                title: Text('Error'),
+                content: Text(error.toString()),
+              );
+            });
+        setState(() {
+          fetchingLocation = false;
+        });
+      });
+      //display a alertdialog for error
+    } catch (e) {
+      print('Error getting location or apartments: $e');
+    }
   }
 
   @override
@@ -98,6 +140,9 @@ class _HomePageState extends State<HomePage> {
           setState(() {
             currentPageIndex = index;
           });
+          if (index == 0) {
+            searchController = TextEditingController();
+          }
         },
         indicatorColor: Theme.of(context).colorScheme.primaryContainer,
         selectedIndex: currentPageIndex,
@@ -148,17 +193,8 @@ class _HomePageState extends State<HomePage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    Text(
-                      'ID Number: ${data['idNumber']}',
-                      style: const TextStyle(fontSize: 18),
-                    ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    Text(
-                      'Email: ${data['email']}',
-                      style: const TextStyle(fontSize: 18),
-                    ),
+                    profileCard('ID Number: ${data['idNumber']}'),
+                    profileCard('Email: ${data['email']}'),
                   ],
                 );
               } else if (snapshot.hasError) {
@@ -173,16 +209,16 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  //create a column of home page that displays the list of transients, use streambuilder
-  //create a card for each transient, display name, location, price, and image
-  //create a button for each transient that navigates to the details page
-  //create a search bar that filters the list of transients
-  //create a filter button that navigates to the filter page
-  //create a button that navigates to the profile page
-  //create a button that logs out the user
-  //create a button that navigates to the chat page
-  //create a button that navigates to the feedback page
-  //create a button that navigates to the rating page
+  Card profileCard(String data) {
+    return Card(
+      child: ListTile(
+        title: Text(
+          data,
+          style: const TextStyle(fontSize: 18),
+        ),
+      ),
+    );
+  }
 
   Padding homeWidget() {
     return Padding(
@@ -222,43 +258,98 @@ class _HomePageState extends State<HomePage> {
                   ),
                   DropdownButtonFormField(
                       decoration: InputDecoration(
-                          // enabledBorder: const OutlineInputBorder(
-                          //     borderSide: BorderSide(color: Colors.black38)),
-                          //fillColor: Colors.black12,
                           focusedBorder: const OutlineInputBorder(
                               borderSide: BorderSide(color: Colors.black38)),
-                          contentPadding: const EdgeInsets.all(10.0),
                           labelText: 'Select Location',
                           labelStyle: const TextStyle(color: Colors.black87),
-                          prefixIcon: const Icon(
-                            Icons.pin_drop_rounded,
-                            color: Colors.blue,
-                          ),
                           border: OutlineInputBorder(
                               borderSide: const BorderSide(
                                   width: 1.5, color: Colors.black38),
                               borderRadius: BorderRadius.circular(10.0))),
                       value: _selectedValue,
                       isExpanded: true,
+                      isDense: true,
                       items: listOfValue.map((String val) {
                         return DropdownMenuItem(
                           value: val,
                           child: Row(
                             children: [
-                              Text(
-                                val,
+                              SizedBox(
+                                width: MediaQuery.of(context).size.width - 100,
+                                child: Text(
+                                  val,
+                                  overflow: TextOverflow.ellipsis,
+                                  softWrap: true,
+                                ),
                               ),
                             ],
                           ),
                         );
                       }).toList(),
                       onChanged: (value) {
-                        print(value);
                         setState(() {
                           _selectedValue = value.toString();
                         });
                       }),
+                  const Center(
+                      child: Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: Text(
+                      'OR',
+                      style: TextStyle(fontSize: 18),
+                    ),
+                  )),
+                  Center(
+                    child: fetchingLocation
+                        ? const Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text('Fetching Current Location'),
+                              LinearProgressIndicator(),
+                            ],
+                          )
+                        : ElevatedButton.icon(
+                            onPressed: () async {
+                              setState(() {
+                                fetchingLocation = true;
+                              });
+                              Location location = Location();
+                              bool serviceEnabled;
+                              PermissionStatus permissionGranted;
+                              LocationData locationData;
+                              serviceEnabled = await location.serviceEnabled();
+                              if (!serviceEnabled) {
+                                serviceEnabled =
+                                    await location.requestService();
+                                if (!serviceEnabled) {
+                                  return;
+                                }
+                              }
 
+                              permissionGranted =
+                                  await location.hasPermission();
+                              if (permissionGranted ==
+                                  PermissionStatus.denied) {
+                                permissionGranted =
+                                    await location.requestPermission();
+                                if (permissionGranted !=
+                                    PermissionStatus.granted) {
+                                  return;
+                                }
+                              }
+
+                              locationData = await location.getLocation();
+                              await _fetchNearbyApartments(locationData);
+                            },
+                            label: const Text('Near Me'),
+                            style: ElevatedButton.styleFrom(
+                                elevation: 3.0,
+                                fixedSize: const Size(double.maxFinite, 50),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10))),
+                            icon: const Icon(Icons.location_on),
+                          ),
+                  ),
                   const SizedBox(
                     height: 20,
                   ),
@@ -302,7 +393,7 @@ class _HomePageState extends State<HomePage> {
                             width: 10,
                           ),
                           Text(
-                            'Price Range',
+                            'Price Range Per Head',
                             style: TextStyle(
                                 fontSize: 25, fontWeight: FontWeight.bold),
                           ),
@@ -316,9 +407,6 @@ class _HomePageState extends State<HomePage> {
                               width: MediaQuery.of(context).size.width / 2.5,
                               child: DropdownButtonFormField(
                                   decoration: InputDecoration(
-                                      // enabledBorder: const OutlineInputBorder(
-                                      //     borderSide: BorderSide(color: Colors.black38)),
-                                      //fillColor: Colors.black12,
                                       focusedBorder: const OutlineInputBorder(
                                           borderSide: BorderSide(
                                               color: Colors.black38)),
@@ -381,9 +469,6 @@ class _HomePageState extends State<HomePage> {
                               width: MediaQuery.of(context).size.width / 2.5,
                               child: DropdownButtonFormField(
                                   decoration: InputDecoration(
-                                      // enabledBorder: const OutlineInputBorder(
-                                      //     borderSide: BorderSide(color: Colors.black38)),
-                                      //fillColor: Colors.black12,
                                       focusedBorder: const OutlineInputBorder(
                                           borderSide: BorderSide(
                                               color: Colors.black38)),
@@ -482,8 +567,6 @@ class _HomePageState extends State<HomePage> {
                     },
                     child: TextFieldSearch(
                       label: 'Search',
-
-                      // minStringLength: -1,
                       controller: searchController,
                       initialList: listOfTransient,
                       decoration: const InputDecoration(
@@ -498,18 +581,6 @@ class _HomePageState extends State<HomePage> {
                           border: OutlineInputBorder()),
                     ),
                   ),
-                  // TextField(
-                  //   controller: searchController,
-                  //   decoration: const InputDecoration(
-                  //       contentPadding: EdgeInsets.all(15),
-                  //       hintText: 'type in the transient name',
-                  //       hintStyle: TextStyle(
-                  //         color: Colors.black,
-                  //         fontSize: 18,
-                  //         fontStyle: FontStyle.italic,
-                  //       ),
-                  //       border: OutlineInputBorder()),
-                  // ),
                   const SizedBox(
                     height: 50,
                   ),
@@ -529,16 +600,10 @@ class _HomePageState extends State<HomePage> {
                           'location': _selectedValue,
                           'price': pricerange
                         };
-                        //print(filtered['price']['min']);
-                        //filtered.add(propertyTypes);
                         Navigator.of(context).push(MaterialPageRoute(
                             builder: ((context) => ShowFiltered(
                                   filtered: filtered,
                                 ))));
-                        // print(propertyTypes);
-                        // print(_selectedValue);
-                        // print(min);
-                        // print(max);
                       },
                       label: const Text('Proceed')),
                 ],

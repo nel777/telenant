@@ -30,13 +30,16 @@ class _ViewTransientState extends State<ViewTransient> {
   Widget build(BuildContext context) {
     return Scaffold(
       floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: Colors.blue,
+        backgroundColor: Theme.of(context).primaryColor,
         onPressed: () {
           Navigator.of(context).push(
               MaterialPageRoute(builder: ((context) => const AddTransient())));
         },
-        label: const Text('Add Transient'),
-        icon: const Icon(Icons.add),
+        label: Text(
+          'Add Transient',
+          style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
+        ),
+        icon: Icon(Icons.add, color: Theme.of(context).colorScheme.onPrimary),
       ),
       appBar: AppBar(
         title: const Text('Homepage'),
@@ -78,7 +81,6 @@ class _ViewTransientState extends State<ViewTransient> {
           stream: FirebaseFirestoreService.instance.readItems(),
           builder: ((context, snapshot) {
             List<details> listOfTransients = [];
-            DocumentSnapshot? documentSnapshot;
             if (snapshot.hasData) {
               for (final detail in snapshot.data!.docs) {
                 //print(detail['gallery'].toString());

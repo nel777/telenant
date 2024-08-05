@@ -19,6 +19,13 @@ class FirebaseFirestoreService {
     }
   }
 
+  Future<List<DocumentSnapshot>> getApartmentsFromFirestore() async {
+    QuerySnapshot querySnapshot =
+        await FirebaseFirestore.instance.collection('transientDetails').get();
+
+    return querySnapshot.docs;
+  }
+
   Stream<QuerySnapshot<Object?>> retrieveChatMessages(String name) {
     try {
       return FirebaseFirestore.instance
