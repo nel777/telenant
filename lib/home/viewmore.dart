@@ -16,8 +16,7 @@ class ViewMore extends StatefulWidget {
   final details detail;
   final String? docId;
 
-  const ViewMore({Key? key, required this.detail, this.docId})
-      : super(key: key);
+  const ViewMore({super.key, required this.detail, this.docId});
 
   @override
   State<ViewMore> createState() => _ViewMoreState();
@@ -71,7 +70,7 @@ class _ViewMoreState extends State<ViewMore> {
         body: SingleChildScrollView(
           child: Column(
             children: [
-              Padding(
+              const Padding(
                 padding: EdgeInsets.all(8.0),
                 child: Text(
                   'Details',
@@ -358,8 +357,8 @@ class _ViewMoreState extends State<ViewMore> {
                                                                   return;
                                                                 }
                                                                 Navigator.of(
-                                                                        context)
-                                                                    .pop();
+                                                                    // ignore: use_build_context_synchronously
+                                                                    context).pop();
                                                               },
                                                               child: const Text(
                                                                   'Yes')),
@@ -447,8 +446,8 @@ class _ViewMoreState extends State<ViewMore> {
                                                                       updatedGallery;
                                                                 });
                                                                 Navigator.of(
-                                                                        context)
-                                                                    .pop();
+                                                                    // ignore: use_build_context_synchronously
+                                                                    context).pop();
                                                               },
                                                               child: const Text(
                                                                   'Yes')),
@@ -537,7 +536,6 @@ class _ViewMoreState extends State<ViewMore> {
                           final List<DocumentSnapshot> listOfRated =
                               snapshot.data!.docs;
                           if (listOfRated.isNotEmpty) {
-                            print('is not empty');
                             for (var element in listOfRated) {
                               if (element['establishment']
                                       .toString()
@@ -547,7 +545,6 @@ class _ViewMoreState extends State<ViewMore> {
                               }
                             }
                           } else {
-                            print('is empty');
                             return const SizedBox.shrink();
                           }
                         } else if (snapshot.hasError) {
@@ -561,7 +558,7 @@ class _ViewMoreState extends State<ViewMore> {
                             ),
                           );
                         } else if (!snapshot.hasData) {
-                          return SizedBox.shrink();
+                          return const SizedBox.shrink();
                           // final List<DocumentSnapshot> listOfRated =
                           //     snapshot.data!.docs;
                           // if (listOfRated.isEmpty) {
@@ -570,7 +567,7 @@ class _ViewMoreState extends State<ViewMore> {
                         }
                         return Column(
                           children: [
-                            Text('Reviews',
+                            const Text('Reviews',
                                 style: TextStyle(
                                     color: Colors.black,
                                     fontSize: 28,
@@ -591,7 +588,7 @@ class _ViewMoreState extends State<ViewMore> {
                                             mainAxisAlignment:
                                                 MainAxisAlignment.center,
                                             children: [
-                                              Icon(
+                                              const Icon(
                                                 Icons.person_2_rounded,
                                                 size: 55,
                                               ),
@@ -607,7 +604,6 @@ class _ViewMoreState extends State<ViewMore> {
                                                 emptyIcon: Icons.star_border,
                                                 onChanged: (double rating) {
                                                   // Handle the rating change here
-                                                  print('Rating: $rating');
                                                 },
                                                 displayRatingValue: true,
                                                 interactiveTooltips: true,

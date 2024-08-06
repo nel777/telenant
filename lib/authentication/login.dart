@@ -34,6 +34,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(),
       body: Stack(
         children: [
           Positioned(
@@ -123,15 +124,18 @@ class _LoginPageState extends State<LoginPage> {
                                     value.user!.email.toString());
                                 if (_usernameController.text
                                     .contains('telenant.admin.com')) {
-                                  Navigator.of(context).pushReplacement(
-                                      MaterialPageRoute(
-                                          builder: ((context) =>
-                                              const AdminHomeView())));
+                                  Navigator.of(context).pushAndRemoveUntil(
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            const AdminHomeView()),
+                                    (Route<dynamic> route) => false,
+                                  );
                                 } else {
-                                  Navigator.of(context).pushReplacement(
-                                      MaterialPageRoute(
-                                          builder: ((context) =>
-                                              const HomePage())));
+                                  Navigator.of(context).pushAndRemoveUntil(
+                                    MaterialPageRoute(
+                                        builder: (context) => const HomePage()),
+                                    (Route<dynamic> route) => false,
+                                  );
                                 }
                               }
                               setState(() {

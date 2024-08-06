@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:telenant/home/admin/landingpage.dart';
 import 'package:telenant/home/homepage.dart';
+import 'package:telenant/home/transients_list.dart';
 
 import 'authentication/login.dart';
 
@@ -51,7 +52,7 @@ class _MyAppState extends State<MyApp> {
           ? email.contains('telenant.admin.com')
               ? const AdminHomeView()
               : const HomePage()
-          : const LoginPage(),
+          : const TransientsListUnauthenticated(),
     );
   }
 }
