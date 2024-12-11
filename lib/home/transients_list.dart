@@ -1,5 +1,5 @@
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:telenant/FirebaseServices/services.dart';
 import 'package:telenant/authentication/login.dart';
@@ -29,118 +29,124 @@ class _TransientsListUnauthenticatedState
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
     return Scaffold(
-        appBar: AppBar(
-          title: const Text('Telenants'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context)
-                    .push(MaterialPageRoute(builder: (context) {
-                  return LoginPage();
-                }));
-              },
-              child: Text('Login'),
-            )
-          ],
-        ),
+        // appBar: AppBar(
+        //   title: const Text('Telenants'),
+        //   actions: [
+        //     TextButton(
+        //       onPressed: () {
+        //         Navigator.of(context)
+        //             .push(MaterialPageRoute(builder: (context) {
+        //           return const LoginPage();
+        //         }));
+        //       },
+        //       child: const Text('Login'),
+        //     )
+        //   ],
+        // ),
         body: FutureBuilder(
-          future:
-              FirebaseFirestoreService.instance.getApartmentsFromFirestore(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            if (snapshot.hasError) {
-              return const Center(child: Text('Error'));
-            }
-            if (snapshot.hasData) {
-              List<QueryDocumentSnapshot<Map<String, dynamic>>> documents =
-                  snapshot.data
-                      as List<QueryDocumentSnapshot<Map<String, dynamic>>>;
-
-              return Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: GridView.builder(
-                  itemCount: documents.length,
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    childAspectRatio: 0.77,
-                    crossAxisSpacing: 10,
-                    mainAxisSpacing: 10,
-                    crossAxisCount: 2,
-                  ),
-                  itemBuilder: (context, index) {
-                    Map<String, dynamic> data = documents[index].data();
-                    return Column(
-                      children: [
-                        Container(
-                          decoration: BoxDecoration(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .tertiaryContainer,
-                              borderRadius: BorderRadius.only(
-                                  topLeft: Radius.circular(10),
-                                  topRight: Radius.circular(10))),
-                          child: Center(
-                            child: Text(
-                              data['name'].toString(),
-                              style: TextStyle(
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 17,
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .onTertiaryContainer),
-                            ),
-                          ),
-                        ),
-                        Container(
-                          height: 200,
-                          decoration: BoxDecoration(
-                            image: DecorationImage(
-                              image:
-                                  NetworkImage(data['cover_page'].toString()),
+      future: FirebaseFirestoreService.instance.getApartmentsFromFirestore(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError) {
+          return const Center(child: Text('Error'));
+        }
+        if (snapshot.hasData) {
+          List<QueryDocumentSnapshot<Map<String, dynamic>>> documents = snapshot
+              .data as List<QueryDocumentSnapshot<Map<String, dynamic>>>;
+          return Builder(
+            builder: (context) {
+              final double height = MediaQuery.of(context).size.height;
+              return CarouselSlider(
+                options: CarouselOptions(
+                  height: height,
+                  viewportFraction: 1.0,
+                  enlargeCenterPage: false,
+                  // autoPlay: false,
+                ),
+                items: documents
+                    .map((item) => Stack(
+                          children: [
+                            Center(
+                                child: Image.network(
+                              item['cover_page'].toString(),
                               fit: BoxFit.cover,
-                            ),
-                          ),
-                        ),
-                        Container(
-                          // height: double.infinity,
-                          width: double.infinity,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.only(
-                                bottomLeft: Radius.circular(10),
-                                bottomRight: Radius.circular(10)),
-                            color:
-                                Theme.of(context).colorScheme.primaryContainer,
-                          ),
-
-                          child: Center(
-                            child: TextButton(
-                              onPressed: () {
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(builder: (context) {
-                                    return LoginPage(); // Replace with your desired page
-                                  }),
-                                );
-                              },
-                              child: Text(
-                                'Book Now',
-                                style: TextStyle(fontSize: 20),
+                              height: height,
+                            )),
+                            Positioned(
+                              bottom: 0,
+                              left: 0,
+                              right: 0,
+                              child: Container(
+                                height:
+                                    MediaQuery.of(context).size.height * 0.35,
+                                width: MediaQuery.of(context).size.width,
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [
+                                      Colors.transparent,
+                                      Colors.black.withOpacity(0.8),
+                                      Colors.black,
+                                      Colors.black,
+                                      Colors.black,
+                                      Colors.black,
+                                      Colors.black,
+                                    ],
+                                    begin: Alignment.topCenter,
+                                    end: Alignment.bottomCenter,
+                                  ),
+                                ),
                               ),
                             ),
-                          ),
-                        ),
-                      ],
-                    );
-                  },
-                ),
+                            Positioned(
+                                bottom: 0,
+                                left: 10,
+                                child: SizedBox(
+                                  width:
+                                      MediaQuery.of(context).size.width - 100,
+                                  height:
+                                      MediaQuery.of(context).size.height * 0.25,
+                                  child: Align(
+                                    alignment: Alignment.topLeft,
+                                    child: Text(
+                                      item['name'].toString().isEmpty
+                                          ? 'Transient Has No Name'
+                                          : 'Relax and Unwind at ${item['name'].toString()}',
+                                      style: textTheme.displayMedium!
+                                          .copyWith(color: Colors.white),
+                                    ),
+                                  ),
+                                )),
+                            Positioned(
+                                bottom: 20,
+                                right: 20,
+                                child: IconButton.filledTonal(
+                                    onPressed: () {
+                                      Navigator.of(context).push(
+                                        MaterialPageRoute(builder: (context) {
+                                          return const LoginPage();
+                                        }),
+                                      );
+                                    },
+                                    icon: const Icon(
+                                      Icons.arrow_forward,
+                                      size: 50,
+                                    ))),
+                          ],
+                        ))
+                    .toList(),
               );
-            }
+            },
+          );
+        }
 
-            return Center(
-              child: Text('No data'),
-            );
-          },
-        ));
+        return const Center(
+          child: Text('No data'),
+        );
+      },
+    ));
   }
 }

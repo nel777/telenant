@@ -33,167 +33,191 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     return Scaffold(
-      appBar: AppBar(),
-      body: Stack(
-        children: [
-          Positioned(
-              bottom: -45,
-              child: SizedBox(
-                width: MediaQuery.of(context).size.width,
-                child: Image.asset(
-                  'assets/images/login.png',
-                  fit: BoxFit.contain,
-                ),
-              )),
-          Center(
-            child: Padding(
-              padding: const EdgeInsets.only(left: 16.0, right: 16.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text(
-                    'Telenant',
-                    style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold),
-                  ),
-                  const Text(
-                    'Baguio City transient reservation',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w300),
-                  ),
-                  const SizedBox(
-                    height: 40,
-                  ),
-                  TextFormField(
-                    controller: _usernameController,
-                    decoration: InputDecoration(
-                        labelText: 'Email',
-                        errorText:
-                            emailValidation == '' ? null : emailValidation,
-                        border: const OutlineInputBorder(
-                            borderSide: BorderSide(width: 1.0))),
-                  ),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  TextFormField(
-                    controller: _passwordController,
-                    obscureText: true,
-                    decoration: InputDecoration(
-                        filled: true,
-                        fillColor: Colors.white.withOpacity(0.5),
-                        labelText: 'Password',
-                        errorText: passwordValidation == ''
-                            ? null
-                            : passwordValidation,
-                        helperText: 'Enter password maximum of 6 characters',
-                        hintStyle: const TextStyle(color: Colors.black87),
-                        border: const OutlineInputBorder(
-                            borderSide: BorderSide(width: 1.0))),
-                  ),
-                  const SizedBox(
-                    height: 50,
-                  ),
-                  ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                          fixedSize: const Size(double.maxFinite, 40)),
-                      onPressed: () async {
-                        setState(() {
-                          loading = true;
-                        });
-                        if (_usernameController.text.isEmpty ||
-                            _passwordController.text.isEmpty) {
-                          setState(() {
-                            loading = false;
-                            emailValidation = 'Email cannot be empty';
-                            passwordValidation = 'Password cannot be empty';
-                          });
-                        } else {
-                          setState(() {
-                            emailValidation = '';
-                            passwordValidation = '';
-                          });
-                          try {
-                            await FirebaseAuth.instance
-                                .signInWithEmailAndPassword(
-                                    email: _usernameController.text,
-                                    password: _passwordController.text)
-                                .then((value) async {
-                              if (value.user != null) {
-                                setLoginPersistent(
-                                    value.user!.email.toString());
-                                if (_usernameController.text
-                                    .contains('telenant.admin.com')) {
-                                  Navigator.of(context).pushAndRemoveUntil(
-                                    MaterialPageRoute(
-                                        builder: (context) =>
-                                            const AdminHomeView()),
-                                    (Route<dynamic> route) => false,
-                                  );
-                                } else {
-                                  Navigator.of(context).pushAndRemoveUntil(
-                                    MaterialPageRoute(
-                                        builder: (context) => const HomePage()),
-                                    (Route<dynamic> route) => false,
-                                  );
-                                }
-                              }
-                              setState(() {
-                                loading = false;
-                              });
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+      ),
+      body: SingleChildScrollView(
+        child: SizedBox(
+          height: MediaQuery.of(context).size.height,
+          child: Stack(
+            children: [
+              Positioned(
+                  bottom: 60,
+                  child: SizedBox(
+                    width: MediaQuery.of(context).size.width,
+                    child: Image.asset(
+                      'assets/images/login.png',
+                      fit: BoxFit.contain,
+                    ),
+                  )),
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 16.0, right: 16.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(10.0),
+                        child: Image.asset(
+                          'assets/images/telenant_logo.png',
+                          fit: BoxFit.cover,
+                          height: 170,
+                          width: 170,
+                        ),
+                      ),
+                      const Text(
+                        'Telenant',
+                        style: TextStyle(
+                            fontSize: 40, fontWeight: FontWeight.bold),
+                      ),
+                      const Text(
+                        'Baguio City Transient Reservation',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.w300),
+                      ),
+                      const SizedBox(
+                        height: 40,
+                      ),
+                      TextFormField(
+                        controller: _usernameController,
+                        decoration: InputDecoration(
+                            labelText: 'Email',
+                            errorText:
+                                emailValidation == '' ? null : emailValidation,
+                            border: const OutlineInputBorder(
+                                borderSide: BorderSide(width: 1.0))),
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      TextFormField(
+                        controller: _passwordController,
+                        obscureText: true,
+                        decoration: InputDecoration(
+                            filled: true,
+                            fillColor: Colors.white.withOpacity(0.5),
+                            labelText: 'Password',
+                            errorText: passwordValidation == ''
+                                ? null
+                                : passwordValidation,
+                            helperText:
+                                'Enter password maximum of 6 characters',
+                            hintStyle: const TextStyle(color: Colors.black87),
+                            border: const OutlineInputBorder(
+                                borderSide: BorderSide(width: 1.0))),
+                      ),
+                      const SizedBox(
+                        height: 50,
+                      ),
+                      ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                              fixedSize: const Size(double.maxFinite, 40)),
+                          onPressed: () async {
+                            setState(() {
+                              loading = true;
                             });
-                          } on FirebaseAuthException catch (e) {
-                            if (e.code == 'user-not-found') {
-                              print('No user found for that email.');
-                              setState(() {
-                                emailValidation =
-                                    'No user found for that email.';
-                              });
+                            if (_usernameController.text.isEmpty ||
+                                _passwordController.text.isEmpty) {
                               setState(() {
                                 loading = false;
+                                emailValidation = 'Email cannot be empty';
+                                passwordValidation = 'Password cannot be empty';
                               });
-                            } else if (e.code == 'wrong-password') {
+                            } else {
                               setState(() {
                                 emailValidation = '';
-                                passwordValidation = 'Wrong-password';
+                                passwordValidation = '';
                               });
-                              setState(() {
-                                loading = false;
-                              });
-                              print('Wrong password provided for that user.');
+                              try {
+                                await FirebaseAuth.instance
+                                    .signInWithEmailAndPassword(
+                                        email: _usernameController.text,
+                                        password: _passwordController.text)
+                                    .then((value) async {
+                                  if (value.user != null) {
+                                    setLoginPersistent(
+                                        value.user!.email.toString());
+                                    if (_usernameController.text
+                                        .contains('telenant.admin.com')) {
+                                      Navigator.of(context).pushAndRemoveUntil(
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                const AdminHomeView()),
+                                        (Route<dynamic> route) => false,
+                                      );
+                                    } else {
+                                      Navigator.of(context).pushAndRemoveUntil(
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                const HomePage()),
+                                        (Route<dynamic> route) => false,
+                                      );
+                                    }
+                                  }
+                                  setState(() {
+                                    loading = false;
+                                  });
+                                });
+                              } on FirebaseAuthException catch (e) {
+                                if (e.code == 'user-not-found') {
+                                  print('No user found for that email.');
+                                  setState(() {
+                                    emailValidation =
+                                        'No user found for that email.';
+                                  });
+                                  setState(() {
+                                    loading = false;
+                                  });
+                                } else if (e.code == 'wrong-password') {
+                                  setState(() {
+                                    emailValidation = '';
+                                    passwordValidation = 'Wrong-password';
+                                  });
+                                  setState(() {
+                                    loading = false;
+                                  });
+                                  print(
+                                      'Wrong password provided for that user.');
+                                }
+                              }
                             }
-                          }
-                        }
-                      },
-                      child: loading
-                          ? const SizedBox(
-                              height: 25,
-                              width: 25,
-                              child: CircularProgressIndicator(
-                                color: Colors.blue,
-                              ),
-                            )
-                          : const Text('Login')),
-                  // const SizedBox(
-                  //   height: 50,
-                  // ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text('''Don't have an account yet?'''),
-                      TextButton(
-                          onPressed: () {
-                            Navigator.of(context).push(MaterialPageRoute(
-                                builder: ((context) => const RegisterPage())));
                           },
-                          child: const Text('Register'))
+                          child: loading
+                              ? SizedBox(
+                                  height: 25,
+                                  width: 25,
+                                  child: CircularProgressIndicator(
+                                    color: colorScheme.primary,
+                                  ),
+                                )
+                              : const Text('Login')),
+                      // const SizedBox(
+                      //   height: 50,
+                      // ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text('''Don't have an account yet?'''),
+                          TextButton(
+                              onPressed: () {
+                                Navigator.of(context).push(MaterialPageRoute(
+                                    builder: ((context) =>
+                                        const RegisterPage())));
+                              },
+                              child: const Text('Register'))
+                        ],
+                      )
                     ],
-                  )
-                ],
-              ),
-            ),
-          )
-        ],
+                  ),
+                ),
+              )
+            ],
+          ),
+        ),
       ),
     );
   }

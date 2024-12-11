@@ -4,7 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:telenant/home/admin/landingpage.dart';
 import 'package:telenant/home/homepage.dart';
 import 'package:telenant/home/transients_list.dart';
-
+import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'authentication/login.dart';
 
 Future<void> main() async {
@@ -45,8 +45,61 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
+      theme: FlexThemeData.light(
+        colors: const FlexSchemeColor(
+          // Custom colors
+          primary: Color(0xFFF29F58),
+          primaryContainer: Color(0xFFD0E4FF),
+          primaryLightRef: Color(0xFFF29F58),
+          secondary: Color(0xFFAB4459),
+          secondaryContainer: Color(0xFFFFDBCF),
+          secondaryLightRef: Color(0xFFAB4459),
+          tertiary: Color(0xFF441752),
+          tertiaryContainer: Color(0xFF95F0FF),
+          tertiaryLightRef: Color(0xFF441752),
+          appBarColor: Color(0xFFFFDBCF),
+          error: Color(0xFFBA1A1A),
+          errorContainer: Color(0xFFFFDAD6),
+        ),
+        subThemesData: const FlexSubThemesData(
+          interactionEffects: true,
+          tintedDisabledControls: true,
+          useM2StyleDividerInM3: true,
+          inputDecoratorIsFilled: true,
+          inputDecoratorBorderType: FlexInputBorderType.outline,
+          alignedDropdown: true,
+          navigationRailUseIndicator: true,
+          navigationRailLabelType: NavigationRailLabelType.all,
+        ),
+        visualDensity: FlexColorScheme.comfortablePlatformDensity,
+      ),
+      darkTheme: FlexThemeData.dark(
+        colors: const FlexSchemeColor(
+          primary: Color(0xFF9FC9FF),
+          primaryContainer: Color(0xFF00325B),
+          primaryLightRef: Color(0xFFF29F58),
+          secondary: Color(0xFFFFB59D),
+          secondaryContainer: Color(0xFF872100),
+          secondaryLightRef: Color(0xFFAB4459),
+          tertiary: Color(0xFF86D2E1),
+          tertiaryContainer: Color(0xFF004E59),
+          tertiaryLightRef: Color(0xFF441752),
+          appBarColor: Color(0xFFFFDBCF),
+          error: Color(0xFFFFB4AB),
+          errorContainer: Color(0xFF93000A),
+        ),
+        subThemesData: const FlexSubThemesData(
+          interactionEffects: true,
+          tintedDisabledControls: true,
+          blendOnColors: true,
+          useM2StyleDividerInM3: true,
+          inputDecoratorIsFilled: true,
+          inputDecoratorBorderType: FlexInputBorderType.outline,
+          alignedDropdown: true,
+          navigationRailUseIndicator: true,
+          navigationRailLabelType: NavigationRailLabelType.all,
+        ),
+        visualDensity: FlexColorScheme.comfortablePlatformDensity,
       ),
       home: loggedIn
           ? email.contains('telenant.admin.com')
