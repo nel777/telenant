@@ -1,14 +1,51 @@
+import 'dart:collection';
 import 'dart:io';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:latlng/latlng.dart';
 import 'package:telenant/home/admin/gmap/map.dart';
 import 'package:telenant/models/model.dart';
 
 import '../../FirebaseServices/services.dart';
+
+typedef IconEntry = DropdownMenuEntry<IconLabel>;
+
+enum IconLabel {
+  single('Single Bed Room', Icons.single_bed_rounded),
+  twin('Twin Bed Room', Icons.bedroom_parent_rounded),
+  double('Double Bed Room', Icons.meeting_room_rounded),
+  premier('Premier', Icons.hotel_rounded),
+  executive('Executive', Icons.hotel),
+  superior('Superior', Icons.king_bed_rounded);
+
+  const IconLabel(this.label, this.icon);
+  final String label;
+  final IconData icon;
+
+  // Add a static getter for all values
+  static const List<IconLabel> allValues = [
+    single,
+    twin,
+    double,
+    premier,
+    executive,
+    superior,
+  ];
+
+  static final List<DropdownMenuEntry<IconLabel>> entries = allValues
+      .map<DropdownMenuEntry<IconLabel>>(
+        (icon) => DropdownMenuEntry<IconLabel>(
+          value: icon,
+          label: icon.label,
+          leadingIcon: Icon(icon.icon),
+        ),
+      )
+      .toList();
+}
 
 class AddTransient extends StatefulWidget {
   const AddTransient({super.key});
@@ -32,6 +69,9 @@ class _AddTransientState extends State<AddTransient> {
   final TextEditingController _url = TextEditingController();
   final TextEditingController _min = TextEditingController();
   final TextEditingController _max = TextEditingController();
+  final TextEditingController _roomTypeController = TextEditingController();
+  final TextEditingController _roomNumberController = TextEditingController();
+  IconLabel? selectedIcon;
   addImage(String from) async {
     if (from == 'imagealbum') {
       try {
@@ -73,6 +113,56 @@ class _AddTransientState extends State<AddTransient> {
           child: Column(
             children: [
               textWithField('Transient Name', _transient),
+              Padding(
+                padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Room Details',
+                      style: const TextStyle(
+                          fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    Row(
+                      children: [
+                        Expanded(
+                          flex: 3,
+                          child: DropdownMenu<IconLabel>(
+                            controller: _roomTypeController,
+                            requestFocusOnTap: true,
+                            label: const Text('Room Type'),
+                            leadingIcon: selectedIcon == null
+                                ? null
+                                : Icon(selectedIcon!.icon),
+                            onSelected: (IconLabel? icon) {
+                              setState(() {
+                                selectedIcon = icon;
+                              });
+                            },
+                            dropdownMenuEntries: IconLabel.entries,
+                          ),
+                        ),
+                        Expanded(
+                          flex: 2,
+                          child: TextField(
+                            controller: _roomNumberController,
+                            keyboardType:
+                                TextInputType.number, // Numeric keyboard
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly
+                            ],
+                            decoration: const InputDecoration(
+                              labelText: '# of Rooms',
+                              border: OutlineInputBorder(),
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
+                  ],
+                ),
+              ),
               textWithField('Location', _location),
               textWithField('Contact', _contact),
               textWithField('Website URL', _url),

@@ -102,7 +102,6 @@ class _ManageAccountState extends State<ManageAccount> {
                               });
                             },
                             style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.blue[500],
                                 fixedSize: const Size(250, 40)),
                             child: const Text('Update'))
                       ],

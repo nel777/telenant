@@ -1,5 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:telenant/home/admin/landingpage.dart';
 import 'package:telenant/home/homepage.dart';
@@ -72,6 +73,7 @@ class _MyAppState extends State<MyApp> {
           navigationRailLabelType: NavigationRailLabelType.all,
         ),
         visualDensity: FlexColorScheme.comfortablePlatformDensity,
+        textTheme: GoogleFonts.nunitoSansTextTheme(),
       ),
       darkTheme: FlexThemeData.dark(
         colors: const FlexSchemeColor(
@@ -100,6 +102,7 @@ class _MyAppState extends State<MyApp> {
           navigationRailLabelType: NavigationRailLabelType.all,
         ),
         visualDensity: FlexColorScheme.comfortablePlatformDensity,
+        textTheme: GoogleFonts.nunitoSansTextTheme(),
       ),
       home: loggedIn
           ? email.contains('telenant.admin.com')
