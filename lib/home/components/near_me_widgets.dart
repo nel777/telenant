@@ -28,11 +28,10 @@ class NearMeWidget extends StatelessWidget {
                 onTap: () {
                   Navigator.of(context).push(MaterialPageRoute(
                       builder: ((context) => ViewMore(
-                            detail: details(
+                            detail: Details(
                               name: data[index]['data']['name'],
                               gallery: data[index]['data']['gallery']
                                   as List<dynamic>,
-                              bedrooms: data[index]['data']['bedrooms'],
                               location: data[index]['data']['location'],
                               contact: data[index]['data']['contact'],
                               type: data[index]['data']['type'],

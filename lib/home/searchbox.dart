@@ -179,11 +179,10 @@ class _SearchDemoSearchDelegate extends SearchDelegate<List<String>> {
                     onTap: () {
                       Navigator.of(context).push(MaterialPageRoute(
                           builder: ((context) => ViewMore(
-                                  detail: details(
+                                  detail: Details(
                                 name: finaldata!['name'],
                                 location: finaldata['location'],
                                 coverPage: finaldata['cover_page'],
-                                bedrooms: finaldata['bedrooms'],
                                 gallery: finaldata['gallery'],
                                 // priceRange: PriceRange(
                                 //     min: finaldata['pricerange']
@@ -251,14 +250,12 @@ class _SearchDemoSearchDelegate extends SearchDelegate<List<String>> {
                                     Navigator.of(context)
                                         .push(MaterialPageRoute(
                                             builder: ((context) => ViewMore(
-                                                    detail: details(
+                                                    detail: Details(
                                                   name: finaldata!['name'],
                                                   location:
                                                       finaldata['location'],
                                                   coverPage:
                                                       finaldata['cover_page'],
-                                                  bedrooms:
-                                                      finaldata['bedrooms'],
                                                   gallery: finaldata['gallery'],
                                                   contact: finaldata['contact'],
                                                   type: finaldata['type'],

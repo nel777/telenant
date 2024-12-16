@@ -56,7 +56,22 @@ class AddTransient extends StatefulWidget {
 
 class _AddTransientState extends State<AddTransient> {
   List<String> list = <String>['Townhouse', 'Apartment'];
+  List<String> _selectedAmenities = [
+    'Cleaning Products',
+    'Clothing Storage (Closet)',
+    'Ethernet Connection',
+    'TV',
+    'WiFi',
+    'Hot Water',
+    'Extra Towel',
+    'Extra Pillow and Blanket',
+  ];
+  String _newAmenity = '';
   String dropdownValue = 'Townhouse';
+  bool _fourGuestMax = false;
+  bool _noPets = false;
+  bool _quietHours = false;
+  bool _noSmoking = false;
   ImagePicker picker = ImagePicker();
   bool loading = false;
   XFile? imagecover;
@@ -70,8 +85,11 @@ class _AddTransientState extends State<AddTransient> {
   final TextEditingController _min = TextEditingController();
   final TextEditingController _max = TextEditingController();
   final TextEditingController _roomTypeController = TextEditingController();
+  final TextEditingController _roomBedsController = TextEditingController();
   final TextEditingController _roomNumberController = TextEditingController();
+  final TextEditingController _newAmenityController = TextEditingController();
   IconLabel? selectedIcon;
+  List<String> _selectedHouseRules = [];
   addImage(String from) async {
     if (from == 'imagealbum') {
       try {
@@ -101,8 +119,19 @@ class _AddTransientState extends State<AddTransient> {
     return await storageReference.getDownloadURL();
   }
 
+  void _updateHouseRules(String rule, bool isSelected) {
+    if (isSelected) {
+      if (!_selectedHouseRules.contains(rule)) {
+        _selectedHouseRules.add(rule);
+      }
+    } else {
+      _selectedHouseRules.remove(rule);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Add Transient'),
@@ -119,10 +148,10 @@ class _AddTransientState extends State<AddTransient> {
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    const Text(
                       'Room Details',
-                      style: const TextStyle(
-                          fontSize: 18, fontWeight: FontWeight.bold),
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                     Row(
                       children: [
@@ -143,21 +172,112 @@ class _AddTransientState extends State<AddTransient> {
                             dropdownMenuEntries: IconLabel.entries,
                           ),
                         ),
-                        Expanded(
-                          flex: 2,
-                          child: TextField(
-                            controller: _roomNumberController,
-                            keyboardType:
-                                TextInputType.number, // Numeric keyboard
-                            inputFormatters: [
-                              FilteringTextInputFormatter.digitsOnly
-                            ],
-                            decoration: const InputDecoration(
-                              labelText: '# of Rooms',
-                              border: OutlineInputBorder(),
-                            ),
-                          ),
-                        )
+                        const Padding(padding: EdgeInsets.all(4.0)),
+                        IconLabel.allValues.indexOf(
+                                    selectedIcon ?? IconLabel.allValues.first) >
+                                2
+                            ? Expanded(
+                                flex: 2,
+                                child: TextField(
+                                  controller: _roomBedsController,
+                                  keyboardType:
+                                      TextInputType.number, // Numeric keyboard
+                                  inputFormatters: [
+                                    FilteringTextInputFormatter.digitsOnly
+                                  ],
+                                  decoration: const InputDecoration(
+                                    labelText: '# of Beds',
+                                    border: OutlineInputBorder(),
+                                  ),
+                                ),
+                              )
+                            : const SizedBox.shrink()
+                      ],
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      child: TextField(
+                        controller: _roomNumberController,
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly
+                        ],
+                        decoration: const InputDecoration(
+                          labelText: '# of Rooms',
+                          border: OutlineInputBorder(),
+                        ),
+                      ),
+                    )
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'House Rules',
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    Row(
+                      children: [
+                        Checkbox(
+                          value: _fourGuestMax,
+                          onChanged: (value) {
+                            setState(() {
+                              _fourGuestMax = value!;
+                              _updateHouseRules(
+                                  '4 guest maximum', _fourGuestMax);
+                            });
+                          },
+                        ),
+                        const Text('4 guest maximum'),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        Checkbox(
+                          value: _noPets,
+                          onChanged: (value) {
+                            setState(() {
+                              _noPets = value!;
+                              _updateHouseRules('No pets', _noPets);
+                            });
+                          },
+                        ),
+                        const Text('No pets'),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        Checkbox(
+                          value: _quietHours,
+                          onChanged: (value) {
+                            setState(() {
+                              _quietHours = value!;
+                              _updateHouseRules(
+                                  'Quiet hours (10 PM - 5 AM)', _quietHours);
+                            });
+                          },
+                        ),
+                        const Text('Quiet hours (10 PM - 5 AM)'),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        Checkbox(
+                          value: _noSmoking,
+                          onChanged: (value) {
+                            setState(() {
+                              _noSmoking = value!;
+                              _updateHouseRules('No smoking', _noSmoking);
+                            });
+                          },
+                        ),
+                        const Text('No smoking'),
                       ],
                     ),
                   ],
@@ -175,6 +295,82 @@ class _AddTransientState extends State<AddTransient> {
                   ),
                   type()
                 ],
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Amenities',
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 8.0),
+                    Wrap(
+                      spacing: 8.0,
+                      runSpacing: 8.0,
+                      children: _selectedAmenities.map((amenity) {
+                        return Chip(
+                          backgroundColor: colorScheme.primaryContainer,
+                          label: Text(amenity),
+                          deleteIcon: Icon(
+                            Icons.close,
+                            color: colorScheme.primary,
+                          ),
+                          onDeleted: () {
+                            setState(() {
+                              _selectedAmenities.remove(amenity);
+                            });
+                          },
+                        );
+                      }).toList(),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Add Amenity',
+                            style: TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.bold),
+                          ),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: TextField(
+                                  controller: _newAmenityController,
+                                  onChanged: (value) {
+                                    _newAmenity = value;
+                                  },
+                                  decoration: const InputDecoration(
+                                    hintText: 'Enter new amenity',
+                                    border: OutlineInputBorder(),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 8.0),
+                              OutlinedButton(
+                                onPressed: () {
+                                  if (_newAmenity.isNotEmpty) {
+                                    setState(() {
+                                      _selectedAmenities.add(_newAmenity);
+                                      _newAmenity = '';
+                                      _newAmenityController.clear();
+                                    });
+                                  }
+                                },
+                                child: const Text('Add'),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    )
+                  ],
+                ),
               ),
               coverPageField('Cover Page'),
               albumPageField('Gallery'),
@@ -199,23 +395,30 @@ class _AddTransientState extends State<AddTransient> {
                             await uploadFile(File(imagecover!.path));
                         cover = imageUrls;
                       }
-                      details detail = details(
-                        name: _transient.text,
-                        location: _location.text,
-                        contact: _contact.text,
-                        website: _url.text,
-                        type: dropdownValue,
-                        priceRange: PriceRange(
-                          min: int.parse(_min.text),
-                          max: int.parse(_max.text),
-                        ),
-                        locationLatLng: locationLatLng,
-                        coverPage: cover.toString(),
-                        gallery: album,
-                        managedBy: user!.email.toString(),
-                      );
+                      Details detail = Details(
+                          name: _transient.text,
+                          location: _location.text,
+                          contact: _contact.text,
+                          website: _url.text,
+                          type: dropdownValue,
+                          priceRange: PriceRange(
+                            min: int.parse(_min.text.isEmpty ? '0' : _min.text),
+                            max: int.parse(_max.text.isEmpty ? '0' : _max.text),
+                          ),
+                          locationLatLng: locationLatLng,
+                          roomType:
+                              selectedIcon == null ? '' : selectedIcon!.name,
+                          numberofbeds: _roomBedsController.text,
+                          numberofrooms: _roomNumberController.text,
+                          coverPage: cover.toString(),
+                          gallery: album,
+                          managedBy: user!.email.toString(),
+                          amenities: _selectedAmenities,
+                          houseRules: _selectedHouseRules);
+
                       await FirebaseFirestoreService.instance
                           .addTransient(detail);
+                      print('details:${detail.toJson()}');
                       setState(() {
                         loading = false;
                       });
@@ -257,11 +460,11 @@ class _AddTransientState extends State<AddTransient> {
                   style: ElevatedButton.styleFrom(
                       fixedSize: const Size(double.maxFinite, 45)),
                   child: loading
-                      ? const SizedBox(
+                      ? SizedBox(
                           height: 25,
                           width: 25,
                           child: CircularProgressIndicator(
-                            color: Colors.white,
+                            color: colorScheme.primary,
                           ),
                         )
                       : const Text('Add Transient'))
@@ -357,7 +560,6 @@ class _AddTransientState extends State<AddTransient> {
             ),
             imagecover != null
                 ? SizedBox(
-                    height: 100,
                     width: MediaQuery.of(context).size.width,
                     child: Image.file(
                       File(imagecover!.path),
@@ -417,8 +619,9 @@ class _AddTransientState extends State<AddTransient> {
           controller: controller,
           readOnly: name == 'Location' ? true : false,
           decoration: InputDecoration(
-              hintText:
-                  name == 'Location' ? 'To select press the pin button' : null,
+              hintText: name == 'Location'
+                  ? 'To select press the pin button'
+                  : 'Enter $name',
               contentPadding: const EdgeInsets.all(10),
               suffixIcon: name == 'Location'
                   ? IconButton(

@@ -87,7 +87,7 @@ class _ViewMessagesState extends State<ViewMessages> {
                               builder: ((context) => ChatScreen(
                                     from: result[index]['email'],
                                     sendto: result[index]['email'],
-                                    transient: details(
+                                    transient: Details(
                                       name: result[index]['transient_name'],
                                     ),
                                   ))));

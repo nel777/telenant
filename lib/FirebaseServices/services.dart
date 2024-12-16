@@ -71,7 +71,7 @@ class FirebaseFirestoreService {
     }
   }
 
-  addTransient(details detail) {
+  addTransient(Details detail) {
     try {
       return FirebaseFirestore.instance
           .collection("transientDetails")

@@ -39,6 +39,16 @@ class _HomePageState extends State<HomePage> {
   late TextEditingController searchController;
   bool fetchingLocation = false;
 
+  List<PropertyType> propertyTypeList = [
+    PropertyType(
+      type: 'Apartment',
+      asset: 'assets/images/apartment.png',
+    ),
+    PropertyType(
+      type: 'Townhouse',
+      asset: 'assets/images/townhouse.png',
+    ),
+  ];
   @override
   void initState() {
     super.initState();
@@ -75,7 +85,7 @@ class _HomePageState extends State<HomePage> {
             context: context,
             builder: (context) {
               return AlertDialog(
-                title: Text('Error'),
+                title: const Text('Error'),
                 content: Text(error.toString()),
               );
             });
@@ -124,15 +134,7 @@ class _HomePageState extends State<HomePage> {
           'Filter',
           style: TextStyle(color: Colors.black87),
         ),
-        actions: const [
-          // TextButton.icon(
-          //     onPressed: () {},
-          //     icon: const Icon(Icons.refresh, color: Colors.black87),
-          //     label: const Text(
-          //       'Reset',
-          //       style: TextStyle(color: Colors.black87),
-          //     ))
-        ],
+        actions: const [],
       ),
       bottomNavigationBar: NavigationBar(
         onDestinationSelected: (int index) {
@@ -239,18 +241,9 @@ class _HomePageState extends State<HomePage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  const Row(
-                    children: [
-                      Icon(Icons.location_searching_rounded),
-                      SizedBox(
-                        width: 10,
-                      ),
-                      Text(
-                        'Available Locations',
-                        style: TextStyle(
-                            fontSize: 25, fontWeight: FontWeight.bold),
-                      ),
-                    ],
+                  Text(
+                    'Available Locations',
+                    style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(
                     height: 15,
@@ -290,14 +283,7 @@ class _HomePageState extends State<HomePage> {
                           _selectedValue = value.toString();
                         });
                       }),
-                  const Center(
-                      child: Padding(
-                    padding: EdgeInsets.all(8.0),
-                    child: Text(
-                      'OR',
-                      style: TextStyle(fontSize: 18),
-                    ),
-                  )),
+                  Padding(padding: EdgeInsets.all(4)),
                   Center(
                     child: fetchingLocation
                         ? const Column(
@@ -345,6 +331,10 @@ class _HomePageState extends State<HomePage> {
                                 elevation: 3.0,
                                 fixedSize: const Size(double.maxFinite, 50),
                                 shape: RoundedRectangleBorder(
+                                    side: BorderSide(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .secondary),
                                     borderRadius: BorderRadius.circular(10))),
                             icon: const Icon(Icons.location_on),
                           ),
@@ -366,14 +356,56 @@ class _HomePageState extends State<HomePage> {
                       ),
                       SingleChildScrollView(
                         scrollDirection: Axis.horizontal,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            propertyType(Icons.apartment, 'Apartment'),
-                            propertyType(Icons.house, 'Townhouse'),
-                            // propertyType(
-                            //     Icons.view_timeline_rounded, 'Any'),
-                          ],
+                        child: SizedBox(
+                          height: 170,
+                          width: MediaQuery.of(context).size.width,
+                          child: GridView.builder(
+                            itemCount: propertyTypeList.length,
+                            physics: const NeverScrollableScrollPhysics(),
+                            gridDelegate:
+                                const SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: 2, childAspectRatio: 1.3),
+                            itemBuilder: (context, index) {
+                              return InkWell(
+                                onTap: () {
+                                  if (propertyTypeList[index].type ==
+                                      'Apartment') {
+                                    if (propertyTypes.contains(
+                                        propertyTypeList[index].type)) {
+                                      setState(() {
+                                        propertyTypes.remove(
+                                            propertyTypeList[index].type);
+                                      });
+                                    } else {
+                                      setState(() {
+                                        propertyTypes
+                                            .add(propertyTypeList[index].type);
+                                      });
+                                    }
+                                  } else if (propertyTypeList[index].type ==
+                                      'Townhouse') {
+                                    if (propertyTypes.contains(
+                                        propertyTypeList[index].type)) {
+                                      setState(() {
+                                        propertyTypes.remove(
+                                            propertyTypeList[index].type);
+                                      });
+                                    } else {
+                                      setState(() {
+                                        propertyTypes
+                                            .add(propertyTypeList[index].type);
+                                      });
+                                    }
+                                  }
+                                  ;
+                                },
+                                child: cardPropertyType(
+                                    context,
+                                    propertyTypeList[index].type,
+                                    propertyTypeList[index].asset),
+                              );
+                            },
+                          ),
                         ),
                       )
                     ],
@@ -385,18 +417,10 @@ class _HomePageState extends State<HomePage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
-                      const Row(
-                        children: [
-                          Icon(Icons.money_rounded),
-                          SizedBox(
-                            width: 10,
-                          ),
-                          Text(
-                            'Price Range Per Head',
-                            style: TextStyle(
-                                fontSize: 25, fontWeight: FontWeight.bold),
-                          ),
-                        ],
+                      Text(
+                        'Price Range Per Head',
+                        style: TextStyle(
+                            fontSize: 25, fontWeight: FontWeight.bold),
                       ),
                       Padding(
                         padding: const EdgeInsets.only(top: 16.0),
@@ -612,6 +636,38 @@ class _HomePageState extends State<HomePage> {
         ));
   }
 
+  Card cardPropertyType(BuildContext context, String type, String asset) {
+    return Card(
+      shape: OutlineInputBorder(
+          borderSide: BorderSide(
+              width: 3.0,
+              style: propertyTypes.contains(type)
+                  ? BorderStyle.solid
+                  : BorderStyle.none,
+              color: Theme.of(context).colorScheme.primary)),
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          children: [
+            SizedBox(
+              height: 100,
+              // width: 100,
+              child: Image.asset(
+                asset,
+                fit: BoxFit.cover,
+              ),
+            ),
+            const Divider(),
+            Text(
+              type,
+              style: Theme.of(context).textTheme.titleLarge,
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
   Padding propertyType(IconData icon, String type) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
@@ -681,4 +737,11 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
+}
+
+class PropertyType {
+  final String type;
+  final String asset;
+
+  PropertyType({required this.type, required this.asset});
 }

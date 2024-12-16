@@ -80,12 +80,12 @@ class _ViewTransientState extends State<ViewTransient> {
       body: StreamBuilder<QuerySnapshot>(
           stream: FirebaseFirestoreService.instance.readItems(),
           builder: ((context, snapshot) {
-            List<details> listOfTransients = [];
+            List<Details> listOfTransients = [];
             if (snapshot.hasData) {
               for (final detail in snapshot.data!.docs) {
                 //print(detail['gallery'].toString());
                 if (user!.email == detail['managedBy']) {
-                  listOfTransients.add(details(
+                  listOfTransients.add(Details(
                     name: detail['name'].toString(),
                     location: detail['location'].toString(),
                     contact: detail['contact'].toString(),
@@ -97,6 +97,23 @@ class _ViewTransientState extends State<ViewTransient> {
                         max: detail['price_range']['max']),
                     coverPage: detail['cover_page'].toString(),
                     gallery: detail['gallery'],
+                    roomType: detail['roomType'].toString(),
+                    numberofbeds: detail['numberofbeds'].toString(),
+                    numberofrooms: detail['numberofrooms'].toString(),
+                    unavailableDates: (detail.data() as Map<String, dynamic>)
+                                .containsKey('unavailableDates') &&
+                            detail['unavailableDates'] != null
+                        ? (detail['unavailableDates'] as List<dynamic>)
+                            .map((e) => DateTimeRange(
+                                  start: (e['start'] as Timestamp).toDate(),
+                                  end: (e['end'] as Timestamp).toDate(),
+                                ))
+                            .toList()
+                        : [],
+                    houseRules:
+                        (detail['house_rules'] as List<dynamic>).cast<String>(),
+                    amenities:
+                        (detail['amenities'] as List<dynamic>).cast<String>(),
                     docId: detail.id,
                   ));
                 }
@@ -175,6 +192,7 @@ class _ViewTransientState extends State<ViewTransient> {
                                 listOfTransients[index].location.toString()),
                             trailing: TextButton(
                                 onPressed: () {
+                                  // print(listOfTransients[index].amenities);
                                   Navigator.of(context).push(MaterialPageRoute(
                                       builder: ((context) => ViewMore(
                                           docId: listOfTransients[index].docId,

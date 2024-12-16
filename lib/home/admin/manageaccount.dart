@@ -185,12 +185,16 @@ class _ManageAccountState extends State<ManageAccount> {
                                               },
                                               icon: Icon(
                                                 Icons.message,
-                                                color: Colors.green[300],
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .primary,
                                               ),
                                               label: Text(
                                                 'View Chat Messages',
                                                 style: TextStyle(
-                                                  color: Colors.green[300],
+                                                  color: Theme.of(context)
+                                                      .colorScheme
+                                                      .primary,
                                                 ),
                                               )),
                                         ],

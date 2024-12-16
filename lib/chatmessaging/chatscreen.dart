@@ -8,7 +8,7 @@ import '../models/model.dart';
 import 'chatmessage.dart';
 
 class ChatScreen extends StatefulWidget {
-  final details transient;
+  final Details transient;
   final String? sendto;
   final String? from;
   const ChatScreen({Key? key, required this.transient, this.sendto, this.from})

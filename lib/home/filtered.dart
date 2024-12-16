@@ -78,7 +78,7 @@ class _ShowFilteredState extends State<ShowFiltered> {
             child: StreamBuilder<QuerySnapshot>(
                 stream: FirebaseFirestoreService.instance.readItems(),
                 builder: ((context, snapshot) {
-                  List<details> filteredList = [];
+                  List<Details> filteredList = [];
                   if (snapshot.hasData) {
                     for (final detail in snapshot.data!.docs) {
                       print(detail['gallery']);
@@ -104,17 +104,46 @@ class _ShowFilteredState extends State<ShowFiltered> {
                                           detail['price_range']['max']) ||
                                       (widget.filtered['price']['max'] >
                                           detail['price_range']['max']))))) {
-                        filteredList.add(details(
-                          name: detail['name'],
-                          gallery: detail['gallery'] as List<dynamic>,
-                          bedrooms: detail['bedrooms'],
-                          location: detail['location'],
-                          contact: detail['contact'],
-                          type: detail['type'],
-                          website: detail['website'],
-                          managedBy: detail['managedBy'],
-                          coverPage: detail['cover_page'],
-                        ));
+                        filteredList.add(Details(
+                            name: detail['name'],
+                            gallery: detail['gallery'] as List<dynamic>,
+                            location: detail['location'],
+                            contact: detail['contact'],
+                            type: detail['type'],
+                            website: detail['website'],
+                            managedBy: detail['managedBy'],
+                            coverPage: detail['cover_page'],
+                            priceRange: PriceRange(
+                                min: detail['price_range']['min'],
+                                max: detail['price_range']['max']),
+                            roomType: (detail.data() as Map<String, dynamic>).containsKey('roomType') && detail['roomType'] != null
+                                ? detail['roomType'].toString()
+                                : '',
+                            numberofbeds: (detail.data() as Map<String, dynamic>)
+                                        .containsKey('numberofbeds') &&
+                                    detail['numberofbeds'] != null
+                                ? detail['numberofbeds'].toString()
+                                : '',
+                            numberofrooms:
+                                (detail.data() as Map<String, dynamic>).containsKey('numberofrooms') &&
+                                        detail['numberofrooms'] != null
+                                    ? detail['numberofrooms'].toString()
+                                    : '',
+                            unavailableDates: (detail.data() as Map<String, dynamic>)
+                                        .containsKey('unavailableDates') &&
+                                    detail['unavailableDates'] != null
+                                ? (detail['unavailableDates'] as List<dynamic>)
+                                    .map((e) => DateTimeRange(
+                                          start: (e['start'] as Timestamp)
+                                              .toDate(),
+                                          end: (e['end'] as Timestamp).toDate(),
+                                        ))
+                                    .toList()
+                                : [],
+                            houseRules: (detail.data() as Map<String, dynamic>).containsKey('house_rules') && detail['house_rules'] != null
+                                ? (detail['house_rules'] as List<dynamic>).cast<String>()
+                                : [],
+                            amenities: (detail.data() as Map<String, dynamic>).containsKey('amenities') && detail['amenities'] != null ? (detail['amenities'] as List<dynamic>).cast<String>() : []));
                       }
                     }
                   }
@@ -209,29 +238,6 @@ class _ShowFilteredState extends State<ShowFiltered> {
                                                 );
                                               },
                                             ),
-                                          ),
-                                        ),
-                                        Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: Row(
-                                            children: [
-                                              Text(
-                                                filteredList[index]
-                                                    .name
-                                                    .toString(),
-                                                style: const TextStyle(
-                                                    fontWeight:
-                                                        FontWeight.bold),
-                                              ),
-                                              const Spacer(),
-                                              Text(
-                                                  '${filteredList[index].bedrooms.toString() == 'null' ? '???' : filteredList[index].bedrooms.toString()} Bed'),
-                                              // Padding(
-                                              //   padding: EdgeInsets.only(left: 5.0, right: 5.0),
-                                              //   child: Text('|'),
-                                              // ),
-                                              // Text('1 Restroom'),
-                                            ],
                                           ),
                                         ),
                                         Padding(
