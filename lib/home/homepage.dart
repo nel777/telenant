@@ -1,10 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:location/location.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:telenant/FirebaseServices/services.dart';
 import 'package:telenant/authentication/login.dart';
+import 'package:telenant/home/admin/addtransient.dart';
 import 'package:telenant/home/components/near_me_widgets.dart';
 import 'package:telenant/home/filtered.dart';
 import 'package:telenant/home/searchbox.dart';
@@ -23,8 +25,12 @@ class _HomePageState extends State<HomePage> {
   int min = 200;
   int max = 10000;
   int currentPageIndex = 0;
+  IconLabel? selectedIcon;
   late Future<List<Map<String, dynamic>>> _nearbyApartments;
   List propertyTypes = [];
+  final TextEditingController _roomTypeController = TextEditingController();
+  final TextEditingController _roomBedsController = TextEditingController();
+  final TextEditingController _roomNumberController = TextEditingController();
   List<String> listOfPriceValue = [
     '200',
     '300',
@@ -41,12 +47,12 @@ class _HomePageState extends State<HomePage> {
 
   List<PropertyType> propertyTypeList = [
     PropertyType(
-      type: 'Apartment',
-      asset: 'assets/images/apartment.png',
-    ),
-    PropertyType(
       type: 'Townhouse',
       asset: 'assets/images/townhouse.png',
+    ),
+    PropertyType(
+      type: 'Apartment',
+      asset: 'assets/images/apartment.png',
     ),
   ];
   @override
@@ -140,6 +146,9 @@ class _HomePageState extends State<HomePage> {
         onDestinationSelected: (int index) {
           setState(() {
             currentPageIndex = index;
+            if (index == 1) {
+              _selectedValue = 'Near Town';
+            }
           });
           if (index == 0) {
             searchController = TextEditingController();
@@ -159,9 +168,7 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-          //controller: _scrollController,
-          child: currentPageIndex == 0 ? homeWidget() : profileWidget()),
+      body: currentPageIndex == 0 ? homeWidget() : profileWidget(),
     );
   }
 
@@ -221,27 +228,28 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Padding homeWidget() {
-    return Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: StreamBuilder<QuerySnapshot>(
-          stream: FirebaseFirestoreService.instance.readItems(),
-          builder: ((context, snapshot) {
-            List<String> listOfValue = ['Near Town'];
-            List<String> listOfTransient = [];
-            if (snapshot.hasData) {
-              for (final detail in snapshot.data!.docs) {
-                listOfValue.add(detail['location']);
-                listOfTransient.add(detail['name']);
+  SingleChildScrollView homeWidget() {
+    return SingleChildScrollView(
+      child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: StreamBuilder<QuerySnapshot>(
+            stream: FirebaseFirestoreService.instance.readItems(),
+            builder: ((context, snapshot) {
+              List<String> listOfValue = ['Near Town'];
+              List<String> listOfTransient = [];
+              if (snapshot.hasData) {
+                for (final detail in snapshot.data!.docs) {
+                  if (!listOfValue.contains(detail['location'])) {
+                    listOfValue.add(detail['location']);
+                  }
+                  listOfTransient.add(detail['name']);
+                }
               }
-            }
-            return SizedBox(
-              height: MediaQuery.of(context).size.height,
-              child: Column(
+              return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  Text(
+                  const Text(
                     'Available Locations',
                     style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
                   ),
@@ -283,7 +291,7 @@ class _HomePageState extends State<HomePage> {
                           _selectedValue = value.toString();
                         });
                       }),
-                  Padding(padding: EdgeInsets.all(4)),
+                  const Padding(padding: EdgeInsets.all(4)),
                   Center(
                     child: fetchingLocation
                         ? const Column(
@@ -357,14 +365,15 @@ class _HomePageState extends State<HomePage> {
                       SingleChildScrollView(
                         scrollDirection: Axis.horizontal,
                         child: SizedBox(
-                          height: 170,
+                          height: 270,
                           width: MediaQuery.of(context).size.width,
                           child: GridView.builder(
                             itemCount: propertyTypeList.length,
-                            physics: const NeverScrollableScrollPhysics(),
+                            scrollDirection: Axis.horizontal,
+                            // physics: const NeverScrollableScrollPhysics(),
                             gridDelegate:
                                 const SliverGridDelegateWithFixedCrossAxisCount(
-                                    crossAxisCount: 2, childAspectRatio: 1.3),
+                                    crossAxisCount: 1, childAspectRatio: 0.85),
                             itemBuilder: (context, index) {
                               return InkWell(
                                 onTap: () {
@@ -397,7 +406,6 @@ class _HomePageState extends State<HomePage> {
                                       });
                                     }
                                   }
-                                  ;
                                 },
                                 child: cardPropertyType(
                                     context,
@@ -410,14 +418,80 @@ class _HomePageState extends State<HomePage> {
                       )
                     ],
                   ),
-                  const Divider(
-                    color: Colors.black,
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Room Details',
+                          style: TextStyle(
+                              fontSize: 25, fontWeight: FontWeight.bold),
+                        ),
+                        Row(
+                          children: [
+                            Expanded(
+                              flex: 3,
+                              child: DropdownMenu<IconLabel>(
+                                controller: _roomTypeController,
+                                requestFocusOnTap: true,
+                                label: const Text('Room Type'),
+                                leadingIcon: selectedIcon == null
+                                    ? null
+                                    : Icon(selectedIcon!.icon),
+                                onSelected: (IconLabel? icon) {
+                                  setState(() {
+                                    selectedIcon = icon;
+                                  });
+                                },
+                                dropdownMenuEntries: IconLabel.entries,
+                              ),
+                            ),
+                            const Padding(padding: EdgeInsets.all(4.0)),
+                            IconLabel.allValues.indexOf(selectedIcon ??
+                                        IconLabel.allValues.first) >
+                                    2
+                                ? Expanded(
+                                    flex: 2,
+                                    child: TextField(
+                                      controller: _roomBedsController,
+                                      keyboardType: TextInputType
+                                          .number, // Numeric keyboard
+                                      inputFormatters: [
+                                        FilteringTextInputFormatter.digitsOnly
+                                      ],
+                                      decoration: const InputDecoration(
+                                        labelText: '# of Beds',
+                                        border: OutlineInputBorder(),
+                                      ),
+                                    ),
+                                  )
+                                : const SizedBox.shrink()
+                          ],
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 8.0),
+                          child: TextField(
+                            controller: _roomNumberController,
+                            keyboardType: TextInputType.number,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly
+                            ],
+                            decoration: const InputDecoration(
+                              labelText: '# of Rooms',
+                              border: OutlineInputBorder(),
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
                   ),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
-                      Text(
+                      const Text(
                         'Price Range Per Head',
                         style: TextStyle(
                             fontSize: 25, fontWeight: FontWeight.bold),
@@ -545,29 +619,22 @@ class _HomePageState extends State<HomePage> {
                       )
                     ],
                   ),
-                  const Divider(
-                    color: Colors.black,
-                  ),
-                  const Column(
+                  const Divider(),
+                  Column(
                     mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Center(
-                          child: Text(
-                        'OR',
-                        style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.w400),
-                      )),
-                      SizedBox(
-                        height: 10,
-                      ),
                       Row(
                         children: [
-                          Icon(Icons.search),
-                          SizedBox(
+                          Icon(
+                            Icons.search,
+                            size: 45,
+                            color: Theme.of(context).colorScheme.secondary,
+                          ),
+                          const SizedBox(
                             width: 10,
                           ),
-                          Text(
+                          const Text(
                             'Search by Name',
                             style: TextStyle(
                                 fontSize: 25, fontWeight: FontWeight.bold),
@@ -621,8 +688,13 @@ class _HomePageState extends State<HomePage> {
                         Map<String, dynamic> filtered = {
                           'type': propertyTypes,
                           'location': _selectedValue,
-                          'price': pricerange
+                          'price': pricerange,
+                          'numberofbeds': _roomBedsController.text,
+                          'numberofrooms': _roomNumberController.text,
+                          'roomType':
+                              selectedIcon!.label.toString().toLowerCase(),
                         };
+                        print('ang filtered: $filtered');
                         Navigator.of(context).push(MaterialPageRoute(
                             builder: ((context) => ShowFiltered(
                                   filtered: filtered,
@@ -630,10 +702,10 @@ class _HomePageState extends State<HomePage> {
                       },
                       label: const Text('Proceed')),
                 ],
-              ),
-            );
-          }),
-        ));
+              );
+            }),
+          )),
+    );
   }
 
   Card cardPropertyType(BuildContext context, String type, String asset) {
@@ -650,7 +722,7 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           children: [
             SizedBox(
-              height: 100,
+              height: 200,
               // width: 100,
               child: Image.asset(
                 asset,

@@ -118,8 +118,6 @@ class _ViewTransientState extends State<ViewTransient> {
                   ));
                 }
               }
-
-              //print(listOfTransients[0].contact);
             }
             return ListView.builder(
                 itemCount: listOfTransients.length,

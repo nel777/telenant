@@ -7,7 +7,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:telenant/FirebaseServices/services.dart';
 import 'package:telenant/home/components/table_calendar.dart';
+import 'package:telenant/models/chatmodel.dart';
 // import 'package:telenant/home/rate.dart';
 import 'package:telenant/models/model.dart';
 
@@ -30,6 +32,7 @@ class _ViewMoreState extends State<ViewMore> {
   ImagePicker picker = ImagePicker();
   bool hasReviews = false;
   DateTimeRange? selectedDates;
+  bool isLoading = false;
 
   Future<String> uploadFile(File image) async {
     Reference storageReference = FirebaseStorage.instance
@@ -78,7 +81,6 @@ class _ViewMoreState extends State<ViewMore> {
         context: context,
         builder: (confirmDialog) {
           return StatefulBuilder(builder: (dialogContext, setDialogState) {
-            bool isLoading = false;
             return AlertDialog(
               title: const Text('Make this Unavailable?'),
               content: const Text(
@@ -121,9 +123,123 @@ class _ViewMoreState extends State<ViewMore> {
                   style:
                       ElevatedButton.styleFrom(backgroundColor: Colors.green),
                   label: isLoading
-                      ? const CircularProgressIndicator()
+                      ? const SizedBox(
+                          width: 25,
+                          height: 25,
+                          child: CircularProgressIndicator())
                       : const Text(
                           'Yes',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                ),
+              ],
+            );
+          });
+        });
+  }
+
+  alreadyScheduledAlert() {
+    return showDialog(
+        context: context,
+        builder: (scheduledAlert) {
+          return AlertDialog(
+            icon: const Icon(
+              Icons.warning_rounded,
+              size: 60,
+            ),
+            title: const Text('Not Available'),
+            content: const Text(
+              'Please select another date. This date is already scheduled.',
+              textAlign: TextAlign.center,
+            ),
+            actions: [
+              TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('Ok'))
+            ],
+          );
+        });
+  }
+
+  bookScheduleAlert() {
+    showDialog(
+        context: context,
+        builder: (bookScheduleContext) {
+          return StatefulBuilder(builder: (context, setDialogState) {
+            final message =
+                'Yes, I would like to book this place on ${selectedDates!.start.month}/${selectedDates!.start.day}/${selectedDates!.start.year} to ${selectedDates!.end.month}/${selectedDates!.end.day}/${selectedDates!.end.year}';
+            return AlertDialog(
+              title: const Text('Date Available'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Are you sure you want to book this date?',
+                    textAlign: TextAlign.left,
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(message),
+                  const SizedBox(height: 10),
+                  Text(
+                    'Note: This will send a message to the host.',
+                    style: TextStyle(
+                        fontSize: 12,
+                        color: Theme.of(context).colorScheme.error),
+                  )
+                ],
+              ),
+              actions: [
+                ElevatedButton.icon(
+                  onPressed: () async {
+                    setDialogState(() {
+                      isLoading = true;
+                    });
+                    Map<String, dynamic> convertedDate = {
+                      "start": Timestamp.fromDate(selectedDates!.start),
+                      "end": Timestamp.fromDate(selectedDates!.end),
+                    };
+                    print('Document Path: ${widget.detail.docId}');
+                    await FirebaseFirestore.instance
+                        .collection("transientDetails")
+                        .doc(widget.detail.docId)
+                        .update({
+                      "unavailableDates": FieldValue.arrayUnion([convertedDate])
+                    }).then((value) {
+                      try {
+                        FirebaseFirestoreService.instance.sendChatMessages(
+                            widget.detail.name.toString(),
+                            MessageModel(
+                              to: widget.detail.managedBy,
+                              from: user!.email.toString(),
+                              message: message,
+                              timepressed: Timestamp.now(),
+                              transientname: widget.detail.name,
+                            ));
+                      } on FirebaseException catch (ex) {
+                        throw ex.message.toString();
+                      }
+                      setDialogState(() {
+                        isLoading = false;
+                      });
+                      if (mounted) {
+                        Navigator.of(context).pop();
+                      }
+                    });
+                  },
+                  style:
+                      ElevatedButton.styleFrom(backgroundColor: Colors.green),
+                  label: isLoading
+                      ? SizedBox(
+                          width: 25,
+                          height: 25,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                          ))
+                      : const Text(
+                          'Confirm',
                           style: TextStyle(color: Colors.white),
                         ),
                 ),
@@ -286,26 +402,46 @@ class _ViewMoreState extends State<ViewMore> {
                                     },
                                     icon: const Icon(Icons.calendar_month)),
                                 const Spacer(),
-                                widget.detail.managedBy == user!.email
-                                    ? TextButton(
-                                        onPressed: () async {
-                                          final closeThisDate =
-                                              await showDateRangePicker(
-                                                  context: context,
-                                                  firstDate: DateTime.now(),
-                                                  lastDate: DateTime(2100));
-                                          if (closeThisDate != null) {
-                                            setState(() {
-                                              selectedDates = closeThisDate;
-                                            });
+                                TextButton(
+                                    onPressed: () async {
+                                      final closeThisDate =
+                                          await showDateRangePicker(
+                                              context: context,
+                                              firstDate: DateTime.now(),
+                                              lastDate: DateTime(2100));
+                                      if (closeThisDate != null) {
+                                        setState(() {
+                                          selectedDates = closeThisDate;
+                                        });
+                                        if (widget.detail.managedBy ==
+                                            user!.email) {
+                                          displayWarningAlert();
+                                        } else {
+                                          bool isAlreadyScheduled = widget
+                                              .detail.unavailableDates!
+                                              .any((unavailableDate) {
+                                            return !(selectedDates!.end
+                                                    .isBefore(unavailableDate
+                                                        .start) ||
+                                                selectedDates!.start.isAfter(
+                                                    unavailableDate.end));
+                                          });
+
+                                          if (isAlreadyScheduled) {
+                                            alreadyScheduledAlert();
+                                          } else {
+                                            print(closeThisDate);
                                             print(
-                                                'the selected dates are: $selectedDates');
-                                            displayWarningAlert();
+                                                widget.detail.unavailableDates);
+                                            bookScheduleAlert();
                                           }
-                                        },
-                                        child:
-                                            const Text('Book/Reserve Schedule'))
-                                    : SizedBox.shrink()
+                                        }
+                                      }
+                                    },
+                                    child: Text(
+                                        widget.detail.managedBy == user!.email
+                                            ? 'Close Schedule As Admin'
+                                            : 'Book this transient now!'))
                               ],
                             ),
                             Card(
@@ -623,6 +759,51 @@ class _ViewMoreState extends State<ViewMore> {
                                     onTap: () {},
                                     child:
                                         iconText(Icons.web, 'Visit Website')),
+                                SizedBox(
+                                  height: 10,
+                                ),
+                                (widget.detail.houseRules!.isNotEmpty ||
+                                        widget.detail.houseRules! != null)
+                                    ? Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.start,
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Text(
+                                            'House Rules',
+                                            style: textTheme.titleLarge!
+                                                .copyWith(
+                                                    fontWeight:
+                                                        FontWeight.bold),
+                                          ),
+                                          ListView.separated(
+                                            separatorBuilder: (context, index) {
+                                              return const Divider(
+                                                indent: 50.0,
+                                                endIndent: 50.0,
+                                              );
+                                            },
+                                            physics:
+                                                const NeverScrollableScrollPhysics(),
+                                            shrinkWrap: true,
+                                            itemBuilder: (context, index) {
+                                              return ListTile(
+                                                leading: Icon(
+                                                  Icons.check_box_rounded,
+                                                  color: colorScheme.error,
+                                                ),
+                                                title: Text(widget
+                                                    .detail.houseRules![index]),
+                                              );
+                                            },
+                                            itemCount: widget
+                                                .detail.houseRules!.length,
+                                          ),
+                                        ],
+                                      )
+                                    : SizedBox.shrink()
                               ],
                             ),
                             Column(
@@ -677,7 +858,6 @@ class _ViewMoreState extends State<ViewMore> {
                                                       border: Border.all(
                                                         color: Colors.white,
                                                       )),
-                                                  //ClipRRect for image border radius
                                                   child: ClipRRect(
                                                     borderRadius:
                                                         BorderRadius.circular(
