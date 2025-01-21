@@ -114,6 +114,18 @@ class FirebaseFirestoreService {
     }
   }
 
+  Future<Map<String, dynamic>> deleteDocument({required String docId}) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('transientDetails')
+          .doc(docId)
+          .delete();
+      return {'message': 'Transient Deleted!'};
+    } catch (e) {
+      return {'message': 'Error updating document $e'};
+    }
+  }
+
   //create a function that returns the data of userdetails based on passed uid
   Future<DocumentSnapshot<Object?>> getUserDetails(String uid) async {
     try {

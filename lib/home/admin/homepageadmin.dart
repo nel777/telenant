@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -132,43 +134,131 @@ class _ViewTransientState extends State<ViewTransient> {
                               width: 0.5, color: Colors.black)),
                       child: Column(
                         children: [
-                          GestureDetector(
-                            onTap: () {
-                              Navigator.of(context).push(MaterialPageRoute(
-                                  builder: ((context) => ViewMore(
-                                      docId: listOfTransients[index].docId,
-                                      detail: listOfTransients[index]))));
-                            },
-                            child: SizedBox(
-                              height: 200,
-                              child: ClipRRect(
-                                borderRadius: const BorderRadius.only(
-                                    topRight: Radius.circular(20.0),
-                                    topLeft: Radius.circular(20.0)),
-                                child: Image.network(
-                                  listOfTransients[index].coverPage.toString(),
-                                  width: double.infinity,
-                                  fit: BoxFit.cover,
-                                  loadingBuilder: (BuildContext context,
-                                      Widget child,
-                                      ImageChunkEvent? loadingProgress) {
-                                    if (loadingProgress == null) {
-                                      return child;
-                                    }
-                                    return Center(
-                                      child: CircularProgressIndicator(
-                                        value: loadingProgress
-                                                    .expectedTotalBytes !=
-                                                null
-                                            ? loadingProgress
-                                                    .cumulativeBytesLoaded /
-                                                loadingProgress
-                                                    .expectedTotalBytes!
-                                            : null,
-                                      ),
-                                    );
-                                  },
-                                ),
+                          SizedBox(
+                            height: 200,
+                            child: ClipRRect(
+                              borderRadius: const BorderRadius.only(
+                                  topRight: Radius.circular(20.0),
+                                  topLeft: Radius.circular(20.0)),
+                              child: Stack(
+                                children: [
+                                  Image.network(
+                                    listOfTransients[index]
+                                        .coverPage
+                                        .toString(),
+                                    width: double.infinity,
+                                    fit: BoxFit.cover,
+                                    loadingBuilder: (BuildContext context,
+                                        Widget child,
+                                        ImageChunkEvent? loadingProgress) {
+                                      if (loadingProgress == null) {
+                                        return child;
+                                      }
+                                      return Center(
+                                        child: CircularProgressIndicator(
+                                          value: loadingProgress
+                                                      .expectedTotalBytes !=
+                                                  null
+                                              ? loadingProgress
+                                                      .cumulativeBytesLoaded /
+                                                  loadingProgress
+                                                      .expectedTotalBytes!
+                                              : null,
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                  Positioned(
+                                      right: -100,
+                                      top: -130,
+                                      child: Transform.rotate(
+                                        angle: 120,
+                                        child: InkWell(
+                                          onTap: () {
+                                            showDialog(
+                                                context: context,
+                                                builder: (deleteContext) {
+                                                  return AlertDialog(
+                                                    // icon: Icon(Icons.clear),
+                                                    title: Text(
+                                                      'Are you sure you want to delete this?',
+                                                      textAlign:
+                                                          TextAlign.center,
+                                                    ),
+                                                    actions: [
+                                                      ElevatedButton(
+                                                          onPressed: () {
+                                                            if (listOfTransients[
+                                                                        index]
+                                                                    .docId !=
+                                                                null) {
+                                                              FirebaseFirestoreService
+                                                                  .instance
+                                                                  .deleteDocument(
+                                                                      docId: listOfTransients[
+                                                                              index]
+                                                                          .docId!)
+                                                                  .then(
+                                                                      (value) {
+                                                                Navigator.of(
+                                                                        deleteContext)
+                                                                    .pop();
+                                                                ScaffoldMessenger.of(
+                                                                        deleteContext)
+                                                                    .showSnackBar(
+                                                                        SnackBar(
+                                                                  content: Text(
+                                                                      value[
+                                                                          'message']),
+                                                                ));
+                                                              });
+                                                            }
+                                                          },
+                                                          style: ElevatedButton.styleFrom(
+                                                              backgroundColor:
+                                                                  Theme.of(
+                                                                          context)
+                                                                      .colorScheme
+                                                                      .primary),
+                                                          child: Text(
+                                                            'Yes',
+                                                            style: TextStyle(
+                                                                color: Theme.of(
+                                                                        context)
+                                                                    .colorScheme
+                                                                    .onPrimary),
+                                                          )),
+                                                      TextButton(
+                                                          onPressed: () {
+                                                            Navigator.of(
+                                                                    deleteContext)
+                                                                .pop();
+                                                          },
+                                                          child: Text('No'))
+                                                    ],
+                                                  );
+                                                });
+                                          },
+                                          child: Container(
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .primary,
+                                            height: 200,
+                                            width: 200,
+                                            child: Align(
+                                                alignment:
+                                                    Alignment.bottomCenter,
+                                                child: Icon(
+                                                  Icons.delete,
+                                                  color: Theme.of(context)
+                                                      .colorScheme
+                                                      .onPrimary,
+                                                  size: 30,
+                                                )),
+                                          ),
+                                        ),
+                                      ))
+                                ],
                               ),
                             ),
                           ),
