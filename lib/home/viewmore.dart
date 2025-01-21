@@ -709,7 +709,7 @@ class _ViewMoreState extends State<ViewMore> {
                                   ],
                                 ),
                                 Wrap(spacing: 5.0, children: [
-                                  widget.detail.roomType!.isEmpty
+                                  widget.detail.type!.isEmpty
                                       ? SizedBox.shrink()
                                       : Chip(
                                           elevation: 3.0,
@@ -718,7 +718,7 @@ class _ViewMoreState extends State<ViewMore> {
                                           shape: RoundedRectangleBorder(
                                               borderRadius:
                                                   BorderRadius.circular(25.0)),
-                                          label: Text(widget.detail.roomType!
+                                          label: Text(widget.detail.type!
                                               .toUpperCase())),
                                   widget.detail.numberofbeds!.isEmpty
                                       ? SizedBox.shrink()

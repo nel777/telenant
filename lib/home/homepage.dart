@@ -694,7 +694,6 @@ class _HomePageState extends State<HomePage> {
                           'roomType':
                               selectedIcon!.label.toString().toLowerCase(),
                         };
-                        print('ang filtered: $filtered');
                         Navigator.of(context).push(MaterialPageRoute(
                             builder: ((context) => ShowFiltered(
                                   filtered: filtered,

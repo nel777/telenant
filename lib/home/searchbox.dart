@@ -178,21 +178,7 @@ class _SearchDemoSearchDelegate extends SearchDelegate<List<String>> {
                   child: GestureDetector(
                     onTap: () {
                       Navigator.of(context).push(MaterialPageRoute(
-                          builder: ((context) => ViewMore(
-                                  detail: Details(
-                                name: finaldata!['name'],
-                                location: finaldata['location'],
-                                coverPage: finaldata['cover_page'],
-                                gallery: finaldata['gallery'],
-                                // priceRange: PriceRange(
-                                //     min: finaldata['pricerange']
-                                //         ['min'],
-                                //     max: finaldata['pricerange']
-                                //         ['max']),
-                                contact: finaldata['contact'],
-                                type: finaldata['type'],
-                                website: finaldata['website'],
-                              )))));
+                          builder: ((context) => viewMoreWidget(finaldata))));
                     },
                     child: SizedBox(
                       height: 300,
@@ -246,21 +232,10 @@ class _SearchDemoSearchDelegate extends SearchDelegate<List<String>> {
                               subtitle: Text(finaldata['location'].toString()),
                               trailing: TextButton(
                                   onPressed: () {
-                                    //print(finaldata!['pricerange']);
-                                    Navigator.of(context)
-                                        .push(MaterialPageRoute(
-                                            builder: ((context) => ViewMore(
-                                                    detail: Details(
-                                                  name: finaldata!['name'],
-                                                  location:
-                                                      finaldata['location'],
-                                                  coverPage:
-                                                      finaldata['cover_page'],
-                                                  gallery: finaldata['gallery'],
-                                                  contact: finaldata['contact'],
-                                                  type: finaldata['type'],
-                                                  website: finaldata['website'],
-                                                )))));
+                                    Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                            builder: ((context) =>
+                                                viewMoreWidget(finaldata))));
                                   },
                                   child: const Text('View')),
                             ),
@@ -271,6 +246,52 @@ class _SearchDemoSearchDelegate extends SearchDelegate<List<String>> {
                   ),
                 );
         }));
+  }
+
+  ViewMore viewMoreWidget(QueryDocumentSnapshot<Object?>? detail) {
+    return ViewMore(
+        docId: detail!.id,
+        detail: Details(
+            docId: detail.id,
+            name: detail['name'],
+            gallery: detail['gallery'] as List<dynamic>,
+            location: detail['location'],
+            contact: detail['contact'],
+            type: detail['type'],
+            website: detail['website'],
+            managedBy: detail['managedBy'],
+            coverPage: detail['cover_page'],
+            priceRange: PriceRange(
+                min: detail['price_range']['min'],
+                max: detail['price_range']['max']),
+            roomType: (detail.data() as Map<String, dynamic>).containsKey('roomType') && detail['roomType'] != null
+                ? detail['roomType'].toString()
+                : '',
+            numberofbeds: (detail.data() as Map<String, dynamic>).containsKey('numberofbeds') &&
+                    detail['numberofbeds'] != null
+                ? detail['numberofbeds'].toString()
+                : '',
+            numberofrooms: (detail.data() as Map<String, dynamic>).containsKey('numberofrooms') &&
+                    detail['numberofrooms'] != null
+                ? detail['numberofrooms'].toString()
+                : '',
+            unavailableDates:
+                (detail.data() as Map<String, dynamic>).containsKey('unavailableDates') &&
+                        detail['unavailableDates'] != null
+                    ? (detail['unavailableDates'] as List<dynamic>)
+                        .map((e) => DateTimeRange(
+                              start: (e['start'] as Timestamp).toDate(),
+                              end: (e['end'] as Timestamp).toDate(),
+                            ))
+                        .toList()
+                    : [],
+            houseRules: (detail.data() as Map<String, dynamic>).containsKey('house_rules') &&
+                    detail['house_rules'] != null
+                ? (detail['house_rules'] as List<dynamic>).cast<String>()
+                : [],
+            amenities: (detail.data() as Map<String, dynamic>).containsKey('amenities') && detail['amenities'] != null
+                ? (detail['amenities'] as List<dynamic>).cast<String>()
+                : []));
   }
 }
 
