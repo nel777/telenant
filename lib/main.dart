@@ -6,7 +6,6 @@ import 'package:telenant/home/admin/landingpage.dart';
 import 'package:telenant/home/homepage.dart';
 import 'package:telenant/home/transients_list.dart';
 import 'package:flex_color_scheme/flex_color_scheme.dart';
-import 'authentication/login.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();

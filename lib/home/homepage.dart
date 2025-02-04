@@ -10,6 +10,7 @@ import 'package:telenant/home/admin/addtransient.dart';
 import 'package:telenant/home/components/near_me_widgets.dart';
 import 'package:telenant/home/filtered.dart';
 import 'package:telenant/home/searchbox.dart';
+import 'package:telenant/home/transients_list.dart';
 import 'package:telenant/utils/filter_transients.dart';
 import 'package:textfield_search/textfield_search.dart';
 
@@ -671,9 +672,9 @@ class _HomePageState extends State<HomePage> {
                           border: OutlineInputBorder()),
                     ),
                   ),
-                  const SizedBox(
-                    height: 50,
-                  ),
+                  // const SizedBox(
+                  //   height: 50,
+                  // ),
                   ElevatedButton.icon(
                       icon: const Icon(Icons.arrow_forward_ios_rounded),
                       style: ElevatedButton.styleFrom(
@@ -681,23 +682,32 @@ class _HomePageState extends State<HomePage> {
                               borderRadius: BorderRadius.circular(20)),
                           fixedSize: const Size(double.maxFinite, 40)),
                       onPressed: () {
-                        Map<String, int> pricerange = {
-                          'min': min,
-                          'max': max,
-                        };
-                        Map<String, dynamic> filtered = {
-                          'type': propertyTypes,
-                          'location': _selectedValue,
-                          'price': pricerange,
-                          'numberofbeds': _roomBedsController.text,
-                          'numberofrooms': _roomNumberController.text,
-                          'roomType':
-                              selectedIcon!.label.toString().toLowerCase(),
-                        };
-                        Navigator.of(context).push(MaterialPageRoute(
-                            builder: ((context) => ShowFiltered(
-                                  filtered: filtered,
-                                ))));
+                        try {
+                          Map<String, int> pricerange = {
+                            'min': min,
+                            'max': max,
+                          };
+                          Map<String, dynamic> filtered = {
+                            'type': propertyTypes,
+                            'location': _selectedValue,
+                            'price': pricerange,
+                            'numberofbeds': _roomBedsController.text,
+                            'numberofrooms': _roomNumberController.text,
+                            'roomType':
+                                selectedIcon!.label.toString().toLowerCase(),
+                          };
+                          Navigator.of(context).push(MaterialPageRoute(
+                              builder: ((context) => ShowFiltered(
+                                    filtered: filtered,
+                                  ))));
+                        } catch (e) {
+                          // Navigator.of(context).push(MaterialPageRoute(
+                          //     builder: ((context) =>
+                          //         TransientsListUnauthenticated())));
+                          ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                  content: Text('Fields are empty!')));
+                        }
                       },
                       label: const Text('Proceed')),
                 ],
