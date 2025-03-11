@@ -1,3 +1,12 @@
+// Apply plugins using the new declarative approach
+plugins {
+    id 'com.android.application'
+    id 'com.google.gms.google-services'
+    id 'kotlin-android'
+    id 'dev.flutter.flutter-gradle-plugin'
+}
+
+// Load properties after the plugins block
 def localProperties = new Properties()
 def localPropertiesFile = rootProject.file('local.properties')
 if (localPropertiesFile.exists()) {
@@ -21,23 +30,18 @@ if (flutterVersionName == null) {
     flutterVersionName = '1.0'
 }
 
-apply plugin: 'com.android.application'
-apply plugin: 'com.google.gms.google-services'
-apply plugin: 'kotlin-android'
-apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
-
 android {
     namespace 'com.example.telenant'
     compileSdkVersion flutter.compileSdkVersion
     ndkVersion flutter.ndkVersion
     
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 
     kotlinOptions {
-        jvmTarget = '1.8'
+        jvmTarget = '17'
     }
 
     sourceSets {
@@ -72,5 +76,5 @@ flutter {
 dependencies {
     implementation platform('com.google.firebase:firebase-bom:30.4.1')
     implementation 'com.google.firebase:firebase-analytics-ktx'
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 }

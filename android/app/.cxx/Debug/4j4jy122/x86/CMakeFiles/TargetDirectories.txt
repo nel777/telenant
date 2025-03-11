@@ -1,0 +1,2 @@
+C:/Users/CMO-MITD/Documents/telenants/android/app/.cxx/Debug/4j4jy122/x86/CMakeFiles/edit_cache.dir
+C:/Users/CMO-MITD/Documents/telenants/android/app/.cxx/Debug/4j4jy122/x86/CMakeFiles/rebuild_cache.dir

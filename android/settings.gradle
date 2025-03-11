@@ -1,11 +1,36 @@
-include ':app'
+pluginManagement {
+    // Load Flutter SDK path from local.properties
+    def flutterSdkPath = {
+        def properties = new Properties()
+        def propertiesFile = new File(rootProject.projectDir, "local.properties")
+        if (propertiesFile.exists()) {
+            propertiesFile.withReader("UTF-8") { reader -> properties.load(reader) }
+        }
+        def flutterSdk = properties.getProperty("flutter.sdk")
+        assert flutterSdk != null, "flutter.sdk not set in local.properties"
+        return flutterSdk
+    }()
 
-def localPropertiesFile = new File(rootProject.projectDir, "local.properties")
-def properties = new Properties()
+    // Include Flutter's Gradle tools for building the project
+    includeBuild("${flutterSdkPath}/packages/flutter_tools/gradle")
 
-assert localPropertiesFile.exists()
-localPropertiesFile.withReader("UTF-8") { reader -> properties.load(reader) }
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
 
-def flutterSdkPath = properties.getProperty("flutter.sdk")
-assert flutterSdkPath != null, "flutter.sdk not set in local.properties"
-apply from: "$flutterSdkPath/packages/flutter_tools/gradle/app_plugin_loader.gradle"
+plugins {
+    // Plugin for Flutter builds
+    id "dev.flutter.flutter-plugin-loader" version "1.0.0"
+    
+    // Android application plugin - apply false means it won't be applied to the root project
+    id "com.android.application" version "8.1.2" apply false
+    
+    // Kotlin plugin for Android - updated to the latest stable version
+    id "org.jetbrains.kotlin.android" version "2.0.0" apply false
+}
+
+// Include the app project
+include ':app' 

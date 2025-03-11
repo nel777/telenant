@@ -56,7 +56,7 @@ class AddTransient extends StatefulWidget {
 
 class _AddTransientState extends State<AddTransient> {
   List<String> list = <String>['Townhouse', 'Apartment'];
-  List<String> _selectedAmenities = [
+  final List<String> _selectedAmenities = [
     'Cleaning Products',
     'Clothing Storage (Closet)',
     'Ethernet Connection',
@@ -89,17 +89,16 @@ class _AddTransientState extends State<AddTransient> {
   final TextEditingController _roomNumberController = TextEditingController();
   final TextEditingController _newAmenityController = TextEditingController();
   IconLabel? selectedIcon;
-  List<String> _selectedHouseRules = [];
+  final List<String> _selectedHouseRules = [];
+  final _formKey = GlobalKey<FormState>();
+  final _scrollController = ScrollController();
+
   addImage(String from) async {
     if (from == 'imagealbum') {
       try {
         var pickedfiles = await picker.pickMultiImage();
-        if (pickedfiles != null) {
-          imagealbum = pickedfiles;
-          setState(() {});
-        } else {
-          print("No image is selected.");
-        }
+        imagealbum = pickedfiles;
+        setState(() {});
       } catch (e) {
         print("error while picking file.");
       }
@@ -111,12 +110,40 @@ class _AddTransientState extends State<AddTransient> {
   }
 
   Future<String> uploadFile(File image) async {
-    Reference storageReference = FirebaseStorage.instance
-        .ref()
-        .child('${user!.email.toString()}/${image.path.split('/').last}');
-    UploadTask uploadTask = storageReference.putFile(image);
-    await uploadTask;
-    return await storageReference.getDownloadURL();
+    if (user == null) {
+      throw Exception('User not authenticated');
+    }
+
+    try {
+      final userEmail = user?.email ?? 'anonymous';
+      final fileName =
+          '${DateTime.now().millisecondsSinceEpoch}_${image.path.split('/').last}';
+
+      Reference storageReference = FirebaseStorage.instance
+          .ref()
+          .child('transients/$userEmail/$fileName');
+
+      // Create upload task
+      UploadTask uploadTask = storageReference.putFile(image);
+
+      // Monitor upload progress (optional)
+      uploadTask.snapshotEvents.listen((TaskSnapshot snapshot) {
+        final progress =
+            (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        print('Upload progress: $progress%');
+      }, onError: (e) {
+        throw Exception('Upload failed: $e');
+      });
+
+      // Wait for upload to complete
+      await uploadTask;
+
+      // Get download URL
+      String downloadUrl = await storageReference.getDownloadURL();
+      return downloadUrl;
+    } catch (e) {
+      throw Exception('Failed to upload image: $e');
+    }
   }
 
   void _updateHouseRules(String rule, bool isSelected) {
@@ -132,576 +159,713 @@ class _AddTransientState extends State<AddTransient> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add Transient'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              textWithField('Transient Name', _transient),
-              Padding(
-                padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Room Details',
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                    Row(
-                      children: [
-                        Expanded(
-                          flex: 3,
-                          child: DropdownMenu<IconLabel>(
-                            controller: _roomTypeController,
-                            requestFocusOnTap: true,
-                            label: const Text('Room Type'),
-                            leadingIcon: selectedIcon == null
-                                ? null
-                                : Icon(selectedIcon!.icon),
-                            onSelected: (IconLabel? icon) {
-                              setState(() {
-                                selectedIcon = icon;
-                              });
-                            },
-                            dropdownMenuEntries: IconLabel.entries,
-                          ),
-                        ),
-                        const Padding(padding: EdgeInsets.all(4.0)),
-                        IconLabel.allValues.indexOf(
-                                    selectedIcon ?? IconLabel.allValues.first) >
-                                2
-                            ? Expanded(
-                                flex: 2,
-                                child: TextField(
-                                  controller: _roomBedsController,
-                                  keyboardType:
-                                      TextInputType.number, // Numeric keyboard
-                                  inputFormatters: [
-                                    FilteringTextInputFormatter.digitsOnly
-                                  ],
-                                  decoration: const InputDecoration(
-                                    labelText: '# of Beds',
-                                    border: OutlineInputBorder(),
-                                  ),
-                                ),
-                              )
-                            : const SizedBox.shrink()
-                      ],
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 8.0),
-                      child: TextField(
-                        controller: _roomNumberController,
-                        keyboardType: TextInputType.number,
-                        inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly
-                        ],
-                        decoration: const InputDecoration(
-                          labelText: '# of Rooms',
-                          border: OutlineInputBorder(),
-                        ),
-                      ),
-                    )
-                  ],
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'House Rules',
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                    Row(
-                      children: [
-                        Checkbox(
-                          value: _fourGuestMax,
-                          onChanged: (value) {
-                            setState(() {
-                              _fourGuestMax = value!;
-                              _updateHouseRules(
-                                  '4 guest maximum', _fourGuestMax);
-                            });
-                          },
-                        ),
-                        const Text('4 guest maximum'),
-                      ],
-                    ),
-                    Row(
-                      children: [
-                        Checkbox(
-                          value: _noPets,
-                          onChanged: (value) {
-                            setState(() {
-                              _noPets = value!;
-                              _updateHouseRules('No pets', _noPets);
-                            });
-                          },
-                        ),
-                        const Text('No pets'),
-                      ],
-                    ),
-                    Row(
-                      children: [
-                        Checkbox(
-                          value: _quietHours,
-                          onChanged: (value) {
-                            setState(() {
-                              _quietHours = value!;
-                              _updateHouseRules(
-                                  'Quiet hours (10 PM - 5 AM)', _quietHours);
-                            });
-                          },
-                        ),
-                        const Text('Quiet hours (10 PM - 5 AM)'),
-                      ],
-                    ),
-                    Row(
-                      children: [
-                        Checkbox(
-                          value: _noSmoking,
-                          onChanged: (value) {
-                            setState(() {
-                              _noSmoking = value!;
-                              _updateHouseRules('No smoking', _noSmoking);
-                            });
-                          },
-                        ),
-                        const Text('No smoking'),
-                      ],
+        elevation: 0,
+        backgroundColor: colorScheme.surface,
+        title: Text('Add Transient',
+            style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.help_outline),
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: const Text('Help'),
+                  content: const Text(
+                      'Fill in the details to add a new transient property. All fields marked with * are required.'),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('OK'),
                     ),
                   ],
                 ),
-              ),
-              textWithField('Location', _location),
-              textWithField('Contact', _contact),
-              textWithField('Website URL', _url),
-              Row(
-                //mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  priceRange('Price Range Per Head', _min, _max),
-                  const SizedBox(
-                    width: 10,
-                  ),
-                  type()
-                ],
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Amenities',
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 8.0),
-                    Wrap(
-                      spacing: 8.0,
-                      runSpacing: 8.0,
-                      children: _selectedAmenities.map((amenity) {
-                        return Chip(
-                          backgroundColor: colorScheme.primaryContainer,
-                          label: Text(amenity),
-                          deleteIcon: Icon(
-                            Icons.close,
-                            color: colorScheme.primary,
-                          ),
-                          onDeleted: () {
-                            setState(() {
-                              _selectedAmenities.remove(amenity);
-                            });
-                          },
-                        );
-                      }).toList(),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Add Amenity',
-                            style: TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.bold),
-                          ),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: TextField(
-                                  controller: _newAmenityController,
-                                  onChanged: (value) {
-                                    _newAmenity = value;
-                                  },
-                                  decoration: const InputDecoration(
-                                    hintText: 'Enter new amenity',
-                                    border: OutlineInputBorder(),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 8.0),
-                              OutlinedButton(
-                                onPressed: () {
-                                  if (_newAmenity.isNotEmpty) {
-                                    setState(() {
-                                      _selectedAmenities.add(_newAmenity);
-                                      _newAmenity = '';
-                                      _newAmenityController.clear();
-                                    });
-                                  }
-                                },
-                                child: const Text('Add'),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    )
-                  ],
-                ),
-              ),
-              coverPageField('Cover Page'),
-              albumPageField('Gallery'),
-              const SizedBox(
-                height: 50,
-              ),
-              ElevatedButton(
-                  onPressed: () async {
-                    setState(() {
-                      loading = true;
-                    });
-                    try {
-                      var cover = '';
-                      List<dynamic> album = [];
-                      if (imagealbum != null) {
-                        var imageUrls = await Future.wait(imagealbum!
-                            .map((image) => uploadFile(File(image.path))));
-                        album = imageUrls;
-                      } else {}
-                      if (imagecover != null) {
-                        var imageUrls =
-                            await uploadFile(File(imagecover!.path));
-                        cover = imageUrls;
-                      }
-                      Details detail = Details(
-                          name: _transient.text,
-                          location: _location.text,
-                          contact: _contact.text,
-                          website: _url.text,
-                          type: dropdownValue,
-                          priceRange: PriceRange(
-                            min: int.parse(_min.text.isEmpty ? '0' : _min.text),
-                            max: int.parse(_max.text.isEmpty ? '0' : _max.text),
-                          ),
-                          locationLatLng: locationLatLng,
-                          roomType:
-                              selectedIcon == null ? '' : selectedIcon!.name,
-                          numberofbeds: _roomBedsController.text,
-                          numberofrooms: _roomNumberController.text,
-                          coverPage: cover.toString(),
-                          gallery: album,
-                          managedBy: user!.email.toString(),
-                          amenities: _selectedAmenities,
-                          houseRules: _selectedHouseRules);
-
-                      await FirebaseFirestoreService.instance
-                          .addTransient(detail);
-                      print('details:${detail.toJson()}');
-                      setState(() {
-                        loading = false;
-                      });
-                      showDialog(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                                title: const Text('Success'),
-                                content: const Text('Uploaded successfully'),
-                                actions: <Widget>[
-                                  ElevatedButton(
-                                    child: const Text('Ok'),
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                      Navigator.of(context).pop();
-                                    },
-                                  )
-                                ],
-                              ));
-                    } catch (e) {
-                      setState(() {
-                        loading = false;
-                      });
-                      showDialog(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                                title: const Text('Error'),
-                                content: Text(e.toString()),
-                                actions: <Widget>[
-                                  ElevatedButton(
-                                    child: const Text('Ok'),
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                    },
-                                  )
-                                ],
-                              ));
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                      fixedSize: const Size(double.maxFinite, 45)),
-                  child: loading
-                      ? SizedBox(
-                          height: 25,
-                          width: 25,
-                          child: CircularProgressIndicator(
-                            color: colorScheme.primary,
-                          ),
-                        )
-                      : const Text('Add Transient'))
-            ],
+              );
+            },
           ),
-        ),
+        ],
       ),
-    );
-  }
-
-  Column albumPageField(String name) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          name,
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        ),
-        Column(
+      body: Form(
+        key: _formKey,
+        child: ListView(
+          controller: _scrollController,
+          padding: const EdgeInsets.all(16.0),
           children: [
-            InkWell(
-              splashColor: Colors.blue,
-              onTap: () {
-                addImage('imagealbum');
-              },
-              child: const Card(
-                  shape: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(15.0)),
-                      borderSide: BorderSide(width: 1.0)),
-                  child: ListTile(
-                    leading: Icon(Icons.image),
-                    title: Text('Select Images From Gallery'),
-                  )),
+            _buildSection(
+              'Basic Information',
+              [
+                _buildTextField('Transient Name*', _transient,
+                    validator: (value) =>
+                        value?.isEmpty ?? true ? 'Required field' : null),
+                const SizedBox(height: 16),
+                _buildLocationField(),
+                const SizedBox(height: 16),
+                _buildTextField('Contact*', _contact,
+                    validator: (value) =>
+                        value?.isEmpty ?? true ? 'Required field' : null),
+                const SizedBox(height: 16),
+                _buildTextField('Website URL', _url),
+              ],
             ),
-            const SizedBox(
-              height: 5,
+            const SizedBox(height: 24),
+            _buildSection(
+              'Room Details',
+              [
+                Row(
+                  children: [
+                    Expanded(
+                      flex: 3,
+                      child: DropdownMenu<IconLabel>(
+                        controller: _roomTypeController,
+                        requestFocusOnTap: true,
+                        label: const Text('Room Type*'),
+                        leadingIcon: selectedIcon == null
+                            ? null
+                            : Icon(selectedIcon!.icon),
+                        onSelected: (IconLabel? icon) {
+                          setState(() {
+                            selectedIcon = icon;
+                          });
+                        },
+                        dropdownMenuEntries: IconLabel.entries,
+                        width: MediaQuery.of(context).size.width * 0.6,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    if (IconLabel.allValues.indexOf(
+                            selectedIcon ?? IconLabel.allValues.first) >
+                        2)
+                      Expanded(
+                        flex: 2,
+                        child: TextFormField(
+                          controller: _roomBedsController,
+                          keyboardType: TextInputType.number,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly
+                          ],
+                          decoration: InputDecoration(
+                            labelText: '# of Beds*',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            filled: true,
+                            fillColor: colorScheme.surface,
+                          ),
+                          validator: (value) =>
+                              value?.isEmpty ?? true ? 'Required' : null,
+                        ),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _roomNumberController,
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                  decoration: InputDecoration(
+                    labelText: '# of Rooms*',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    filled: true,
+                    fillColor: colorScheme.surface,
+                  ),
+                  validator: (value) =>
+                      value?.isEmpty ?? true ? 'Required' : null,
+                ),
+              ],
             ),
-            imagealbum != null
-                ? GridView.builder(
+            const SizedBox(height: 24),
+            _buildSection(
+              'Pricing & Type',
+              [
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildPriceRangeField(),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: _buildPropertyTypeDropdown(),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+            _buildSection(
+              'House Rules',
+              [
+                Wrap(
+                  spacing: 8.0,
+                  runSpacing: 4.0,
+                  children: [
+                    _buildRuleChip('4 guest maximum', _fourGuestMax, (value) {
+                      setState(() {
+                        _fourGuestMax = value ?? false;
+                        _updateHouseRules('4 guest maximum', _fourGuestMax);
+                      });
+                    }),
+                    _buildRuleChip('No pets', _noPets, (value) {
+                      setState(() {
+                        _noPets = value ?? false;
+                        _updateHouseRules('No pets', _noPets);
+                      });
+                    }),
+                    _buildRuleChip('Quiet hours', _quietHours, (value) {
+                      setState(() {
+                        _quietHours = value ?? false;
+                        _updateHouseRules(
+                            'Quiet hours (10 PM - 5 AM)', _quietHours);
+                      });
+                    }),
+                    _buildRuleChip('No smoking', _noSmoking, (value) {
+                      setState(() {
+                        _noSmoking = value ?? false;
+                        _updateHouseRules('No smoking', _noSmoking);
+                      });
+                    }),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+            _buildSection(
+              'Amenities',
+              [
+                Wrap(
+                  spacing: 8.0,
+                  runSpacing: 8.0,
+                  children: _selectedAmenities.map((amenity) {
+                    return Chip(
+                      backgroundColor: colorScheme.primaryContainer,
+                      label: Text(amenity),
+                      deleteIcon: Icon(Icons.close, color: colorScheme.primary),
+                      onDeleted: () {
+                        setState(() {
+                          _selectedAmenities.remove(amenity);
+                        });
+                      },
+                    );
+                  }).toList(),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextFormField(
+                        controller: _newAmenityController,
+                        onChanged: (value) {
+                          _newAmenity = value;
+                        },
+                        decoration: InputDecoration(
+                          hintText: 'Add new amenity',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          filled: true,
+                          fillColor: colorScheme.surface,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        if (_newAmenity.isNotEmpty) {
+                          setState(() {
+                            _selectedAmenities.add(_newAmenity);
+                            _newAmenity = '';
+                            _newAmenityController.clear();
+                          });
+                        }
+                      },
+                      icon: const Icon(Icons.add),
+                      label: const Text('Add'),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+            _buildSection(
+              'Images',
+              [
+                _buildImageUploadCard(
+                  'Cover Image*',
+                  imagecover,
+                  () => addImage('imagecover'),
+                  Icons.image,
+                ),
+                const SizedBox(height: 16),
+                _buildImageUploadCard(
+                  'Gallery Images',
+                  null,
+                  () => addImage('imagealbum'),
+                  Icons.photo_library,
+                  isGallery: true,
+                ),
+                if (imagealbum != null) ...[
+                  const SizedBox(height: 8),
+                  GridView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     gridDelegate:
-                        const SliverGridDelegateWithMaxCrossAxisExtent(
-                            maxCrossAxisExtent: 100,
-                            childAspectRatio: 0.5,
-                            crossAxisSpacing: 0.5,
-                            mainAxisSpacing: 0.5),
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 3,
+                      crossAxisSpacing: 8,
+                      mainAxisSpacing: 8,
+                      childAspectRatio: 1,
+                    ),
                     itemCount: imagealbum!.length,
-                    itemBuilder: (BuildContext ctx, index) {
-                      return Container(
-                        alignment: Alignment.center,
-                        // decoration: BoxDecoration(
-                        //     color: Colors.amber,
-                        //     borderRadius: BorderRadius.circular(15)),
+                    itemBuilder: (context, index) {
+                      return ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
                         child: Image.file(
                           File(imagealbum![index].path),
-                          fit: BoxFit.fill,
+                          fit: BoxFit.cover,
                         ),
                       );
-                    })
-                : const SizedBox.shrink()
-          ],
-        )
-      ],
-    );
-  }
-
-  Column coverPageField(String name) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          name,
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        ),
-        Column(
-          children: [
-            InkWell(
-              splashColor: Colors.blue,
-              onTap: () {
-                addImage('imagecover');
-              },
-              child: const Card(
-                  shape: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(15.0)),
-                      borderSide: BorderSide(width: 1.0)),
-                  child: ListTile(
-                    leading: Icon(Icons.camera_alt_rounded),
-                    title: Text('Select Image From Gallery'),
-                  )),
+                    },
+                  ),
+                ],
+              ],
             ),
-            imagecover != null
-                ? SizedBox(
-                    width: MediaQuery.of(context).size.width,
-                    child: Image.file(
-                      File(imagecover!.path),
-                      fit: BoxFit.fill,
-                    ),
-                  )
-                : const SizedBox.shrink()
+            const SizedBox(height: 32),
           ],
-        )
-      ],
-    );
-  }
-
-  Column type() {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Type',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
-        DropdownButton<String>(
-            value: dropdownValue,
-            icon: const Icon(Icons.arrow_downward),
-            elevation: 16,
-            underline: Container(
-              height: 2,
-              color: Colors.blue[900],
-            ),
-            onChanged: (String? value) {
-              // This is called when the user selects an item.
-              setState(() {
-                dropdownValue = value!;
-              });
-            },
-            items: list.map<DropdownMenuItem<String>>((String value) {
-              return DropdownMenuItem<String>(
-                value: value,
-                child: Text(value),
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () async {
+          if (_formKey.currentState?.validate() ?? false) {
+            // Additional validation for required fields
+            if (selectedIcon == null) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Please select a room type'),
+                  backgroundColor: Colors.red,
+                ),
               );
-            }).toList()),
+              return;
+            }
+
+            if (imagecover == null) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Please add a cover image'),
+                  backgroundColor: Colors.red,
+                ),
+              );
+              return;
+            }
+
+            // Check user authentication
+            if (user == null) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Please sign in to add a transient property'),
+                  backgroundColor: Colors.red,
+                ),
+              );
+              return;
+            }
+
+            setState(() {
+              loading = true;
+            });
+
+            try {
+              String? cover;
+              List<String> album = [];
+
+              // Upload cover image first
+              if (imagecover != null) {
+                try {
+                  cover = await uploadFile(File(imagecover!.path));
+                } catch (e) {
+                  throw Exception('Failed to upload cover image: $e');
+                }
+              }
+
+              // Upload gallery images if any
+              if (imagealbum != null && imagealbum!.isNotEmpty) {
+                try {
+                  var imageUrls = await Future.wait(
+                    imagealbum!.map((image) => uploadFile(File(image.path))),
+                  );
+                  album = imageUrls.cast<String>();
+                } catch (e) {
+                  print('Warning: Some gallery images failed to upload: $e');
+                  // Continue with the process even if some gallery uploads fail
+                }
+              }
+
+              // Validate price range
+              final minPrice = int.tryParse(_min.text) ?? 0;
+              final maxPrice = int.tryParse(_max.text) ?? 0;
+
+              if (minPrice > maxPrice) {
+                throw Exception(
+                    'Minimum price cannot be greater than maximum price');
+              }
+
+              if (cover == null) {
+                throw Exception('Cover image upload failed');
+              }
+
+              Details detail = Details(
+                name: _transient.text.trim(),
+                location: _location.text.trim(),
+                contact: _contact.text.trim(),
+                website: _url.text.trim(),
+                type: dropdownValue,
+                priceRange: PriceRange(
+                  min: minPrice,
+                  max: maxPrice,
+                ),
+                locationLatLng:
+                    locationLatLng ?? LocationLatLng(latitude: 0, longitude: 0),
+                roomType: selectedIcon?.name ?? '',
+                numberofbeds: _roomBedsController.text.trim(),
+                numberofrooms: _roomNumberController.text.trim(),
+                coverPage: cover,
+                gallery: album,
+                managedBy: user?.email ?? 'anonymous',
+                amenities: _selectedAmenities,
+                houseRules: _selectedHouseRules,
+              );
+
+              await FirebaseFirestoreService.instance.addTransient(detail);
+
+              setState(() {
+                loading = false;
+              });
+
+              if (mounted) {
+                showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (context) => AlertDialog(
+                    title: const Text('Success'),
+                    content:
+                        const Text('Transient property added successfully'),
+                    actions: <Widget>[
+                      ElevatedButton(
+                        child: const Text('OK'),
+                        onPressed: () {
+                          Navigator.of(context).pop(); // Close dialog
+                          Navigator.of(context)
+                              .pop(); // Go back to previous screen
+                        },
+                      ),
+                    ],
+                  ),
+                );
+              }
+            } catch (e) {
+              setState(() {
+                loading = false;
+              });
+
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Error: ${e.toString()}'),
+                    backgroundColor: Colors.red,
+                    duration: const Duration(seconds: 5),
+                    action: SnackBarAction(
+                      label: 'Dismiss',
+                      onPressed: () {
+                        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                      },
+                    ),
+                  ),
+                );
+              }
+            }
+          } else {
+            // Scroll to the first error
+            _scrollController.animateTo(
+              0,
+              duration: const Duration(milliseconds: 500),
+              curve: Curves.easeInOut,
+            );
+          }
+        },
+        icon: loading
+            ? const SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                ),
+              )
+            : const Icon(Icons.save),
+        label: Text(loading ? 'Saving...' : 'Save Transient'),
+      ),
+    );
+  }
+
+  Widget _buildSection(String title, List<Widget> children) {
+    return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(
+          color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+            const SizedBox(height: 16),
+            ...children,
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTextField(String label, TextEditingController controller,
+      {String? Function(String?)? validator}) {
+    return TextFormField(
+      controller: controller,
+      validator: validator,
+      decoration: InputDecoration(
+        labelText: label,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        filled: true,
+        fillColor: Theme.of(context).colorScheme.surface,
+      ),
+    );
+  }
+
+  Widget _buildLocationField() {
+    return TextFormField(
+      controller: _location,
+      readOnly: true,
+      validator: (value) =>
+          value?.isEmpty ?? true ? 'Location is required' : null,
+      decoration: InputDecoration(
+        labelText: 'Location*',
+        hintText: 'Select location on map',
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        filled: true,
+        fillColor: Theme.of(context).colorScheme.surface,
+        suffixIcon: IconButton(
+          icon: const Icon(Icons.map),
+          onPressed: () => _selectLocation(context),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPriceRangeField() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Price Range*',
+          style: Theme.of(context).textTheme.titleSmall,
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            Expanded(
+              child: TextFormField(
+                controller: _min,
+                keyboardType: TextInputType.number,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                decoration: InputDecoration(
+                  labelText: 'Min',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  filled: true,
+                  fillColor: Theme.of(context).colorScheme.surface,
+                ),
+                validator: (value) =>
+                    value?.isEmpty ?? true ? 'Required' : null,
+              ),
+            ),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 8),
+              child: Text('-'),
+            ),
+            Expanded(
+              child: TextFormField(
+                controller: _max,
+                keyboardType: TextInputType.number,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                decoration: InputDecoration(
+                  labelText: 'Max',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  filled: true,
+                  fillColor: Theme.of(context).colorScheme.surface,
+                ),
+                validator: (value) =>
+                    value?.isEmpty ?? true ? 'Required' : null,
+              ),
+            ),
+          ],
+        ),
       ],
     );
   }
 
-  Column textWithField(String name, TextEditingController controller) {
+  Widget _buildPropertyTypeDropdown() {
     return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          name,
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          'Property Type*',
+          style: Theme.of(context).textTheme.titleSmall,
         ),
-        TextFormField(
-          controller: controller,
-          readOnly: name == 'Location' ? true : false,
+        const SizedBox(height: 8),
+        DropdownButtonFormField<String>(
+          value: dropdownValue,
           decoration: InputDecoration(
-              hintText: name == 'Location'
-                  ? 'To select press the pin button'
-                  : 'Enter $name',
-              contentPadding: const EdgeInsets.all(10),
-              suffixIcon: name == 'Location'
-                  ? IconButton(
-                      onPressed: () {
-                        _selectLocation(context);
-                      },
-                      icon: Icon(Icons.pin_drop_rounded))
-                  : null,
-              border: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.black54))),
-        )
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            filled: true,
+            fillColor: Theme.of(context).colorScheme.surface,
+          ),
+          items: list.map<DropdownMenuItem<String>>((String value) {
+            return DropdownMenuItem<String>(
+              value: value,
+              child: Text(value),
+            );
+          }).toList(),
+          onChanged: (String? value) {
+            setState(() {
+              dropdownValue = value!;
+            });
+          },
+        ),
       ],
+    );
+  }
+
+  Widget _buildRuleChip(
+      String label, bool value, void Function(bool?) onChanged) {
+    return FilterChip(
+      selected: value,
+      label: Text(label),
+      onSelected: onChanged,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      selectedColor: Theme.of(context).colorScheme.primaryContainer,
+      checkmarkColor: Theme.of(context).colorScheme.primary,
+    );
+  }
+
+  Widget _buildImageUploadCard(
+      String title, XFile? image, VoidCallback onTap, IconData icon,
+      {bool isGallery = false}) {
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+          ),
+        ),
+        child: image == null || isGallery
+            ? Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      icon,
+                      size: 48,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      isGallery ? 'Add Gallery Images' : 'Add $title',
+                      style: Theme.of(context).textTheme.titleSmall,
+                    ),
+                  ],
+                ),
+              )
+            : ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.file(
+                  File(image.path),
+                  fit: BoxFit.cover,
+                  height: 200,
+                  width: double.infinity,
+                ),
+              ),
+      ),
     );
   }
 
   Future<void> _selectLocation(BuildContext context) async {
-    final result = await Navigator.of(context).push<Map<String, dynamic>>(
-      MaterialPageRoute(
-        builder: (context) => const InteractiveMapPage(),
-      ),
-    );
+    try {
+      final result = await Navigator.of(context).push<Map<String, dynamic>>(
+        MaterialPageRoute(
+          builder: (context) => const InteractiveMapPage(),
+        ),
+      );
 
-    if (result != null) {
-      // Process the returned data
-      print(result.toString());
-      LatLng location = result['locationLatLng'];
-      setState(() {
-        _location.text = result['locationText'];
-        locationLatLng = LocationLatLng(
-          latitude: location.latitude.degrees,
-          longitude: location.longitude.degrees,
+      if (result != null && mounted) {
+        final location = result['locationLatLng'] as LatLng?;
+        final locationText = result['locationText'] as String?;
+
+        if (location != null && locationText != null) {
+          setState(() {
+            _location.text = locationText;
+            locationLatLng = LocationLatLng(
+              latitude: location.latitude.degrees,
+              longitude: location.longitude.degrees,
+            );
+          });
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Invalid location data received'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error selecting location: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
         );
-      });
+      }
     }
-  }
-
-  Column priceRange(
-      String name, TextEditingController min, TextEditingController max) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          name,
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(
-          height: 10,
-        ),
-        Row(
-          children: [
-            SizedBox(
-              width: 100,
-              child: TextFormField(
-                controller: min,
-                decoration: const InputDecoration(
-                    label: Text('min'),
-                    contentPadding: EdgeInsets.all(10),
-                    border: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.black54))),
-              ),
-            ),
-            const Text(
-              '-',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(
-              width: 100,
-              child: TextFormField(
-                controller: max,
-                decoration: const InputDecoration(
-                    label: Text('max'),
-                    contentPadding: EdgeInsets.all(10),
-                    border: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.black54))),
-              ),
-            ),
-          ],
-        )
-      ],
-    );
   }
 }
