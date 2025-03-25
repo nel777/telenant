@@ -178,25 +178,59 @@ class _ViewTransientState extends State<ViewTransient> {
                     // Safely get values with defaults
                     Map<String, dynamic> data =
                         detail.data() as Map<String, dynamic>;
+                    print(
+                        'Document ID: ${detail.id}, Fields: ${data.keys.toList()}');
 
                     // Safely access price_range
-                    Map<String, dynamic> priceRange =
-                        (data['price_range'] as Map<String, dynamic>?) ??
-                            {'min': 0, 'max': 0};
+                    Map<String, dynamic> priceRange = {'min': 0, 'max': 0};
+                    if (data.containsKey('price_range') &&
+                        data['price_range'] != null) {
+                      try {
+                        priceRange =
+                            data['price_range'] as Map<String, dynamic>;
+                      } catch (e) {
+                        print(
+                            'Error processing price_range for ${data['name']}: $e');
+                      }
+                    }
 
                     // Safely handle lists
                     List<String> houseRules = [];
-                    if (data['house_rules'] != null) {
-                      houseRules = (data['house_rules'] as List<dynamic>)
-                          .map((e) => e.toString())
-                          .toList();
+                    if (data.containsKey('house_rules') &&
+                        data['house_rules'] != null) {
+                      try {
+                        houseRules = (data['house_rules'] as List<dynamic>)
+                            .map((e) => e.toString())
+                            .toList();
+                      } catch (e) {
+                        print(
+                            'Error processing house_rules for ${data['name']}: $e');
+                      }
                     }
 
                     List<String> amenities = [];
-                    if (data['amenities'] != null) {
-                      amenities = (data['amenities'] as List<dynamic>)
-                          .map((e) => e.toString())
-                          .toList();
+                    if (data.containsKey('amenities') &&
+                        data['amenities'] != null) {
+                      try {
+                        amenities = (data['amenities'] as List<dynamic>)
+                            .map((e) => e.toString())
+                            .toList();
+                      } catch (e) {
+                        print(
+                            'Error processing amenities for ${data['name']}: $e');
+                      }
+                    }
+
+                    // Handle gallery safely
+                    List<dynamic> gallery = [];
+                    if (data.containsKey('gallery') &&
+                        data['gallery'] != null) {
+                      try {
+                        gallery = data['gallery'] as List<dynamic>;
+                      } catch (e) {
+                        print(
+                            'Error processing gallery for ${data['name']}: $e');
+                      }
                     }
 
                     // Handle unavailable dates safely
@@ -212,32 +246,65 @@ class _ViewTransientState extends State<ViewTransient> {
                                     ))
                                 .toList();
                       } catch (e) {
-                        print('Error processing unavailable dates: $e');
+                        print(
+                            'Error processing unavailable dates for ${data['name']}: $e');
                       }
                     }
 
+                    // For cover_page, if it doesn't exist, try to use the first gallery image
+                    String coverPage = '';
+                    if (data.containsKey('cover_page') &&
+                        data['cover_page'] != null) {
+                      coverPage = data['cover_page'].toString();
+                    } else if (gallery.isNotEmpty) {
+                      coverPage = gallery[0].toString();
+                      print(
+                          'Using first gallery image as cover for ${data['name']}');
+                    } else {
+                      print('No cover page available for ${data['name']}');
+                    }
+
                     listOfTransients.add(Details(
-                      name: data['name']?.toString() ?? 'Unnamed Property',
-                      location: data['location']?.toString() ?? 'No Location',
-                      contact: data['contact']?.toString() ?? 'No Contact',
-                      website: data['website']?.toString() ?? '',
-                      type: data['type']?.toString() ?? 'Unknown Type',
-                      managedBy: data['managedBy']?.toString() ?? '',
+                      name: data.containsKey('name')
+                          ? data['name']?.toString() ?? 'Unnamed Property'
+                          : 'Unnamed Property',
+                      location: data.containsKey('location')
+                          ? data['location']?.toString() ?? 'No Location'
+                          : 'No Location',
+                      contact: data.containsKey('contact')
+                          ? data['contact']?.toString() ?? 'No Contact'
+                          : 'No Contact',
+                      website: data.containsKey('website')
+                          ? data['website']?.toString() ?? ''
+                          : '',
+                      type: data.containsKey('type')
+                          ? data['type']?.toString() ?? 'Unknown Type'
+                          : 'Unknown Type',
+                      managedBy: data.containsKey('managedBy')
+                          ? data['managedBy']?.toString() ?? ''
+                          : '',
                       priceRange: PriceRange(
                         min: priceRange['min'] ?? 0,
                         max: priceRange['max'] ?? 0,
                       ),
-                      coverPage: data['cover_page']?.toString() ?? '',
-                      gallery: data['gallery'] ?? [],
-                      roomType: data['roomType']?.toString() ?? '',
-                      numberofbeds: data['numberofbeds']?.toString() ?? '0',
-                      numberofrooms: data['numberofrooms']?.toString() ?? '0',
+                      coverPage: coverPage,
+                      gallery: gallery,
+                      roomType: data.containsKey('roomType')
+                          ? data['roomType']?.toString() ?? ''
+                          : '',
+                      numberofbeds: data.containsKey('numberofbeds')
+                          ? data['numberofbeds']?.toString() ?? '0'
+                          : '0',
+                      numberofrooms: data.containsKey('numberofrooms')
+                          ? data['numberofrooms']?.toString() ?? '0'
+                          : '0',
                       unavailableDates: unavailableDates,
                       houseRules: houseRules,
                       amenities: amenities,
                       docId: detail.id,
                     ));
-                    print('Successfully processed property: ${data['name']}');
+                    print(
+                        'Successfully processed property: ${data.containsKey('name') ? data['name'] : 'Unnamed'} (ID: ${detail.id})');
                   } catch (e, stackTrace) {
                     print('Error processing document: $e');
                     print('Stack trace: $stackTrace');

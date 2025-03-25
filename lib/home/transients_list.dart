@@ -70,12 +70,60 @@ class _TransientsListUnauthenticatedState
                 items: documents
                     .map((item) => Stack(
                           children: [
-                            Center(
-                                child: Image.network(
-                              item['cover_page'].toString(),
-                              fit: BoxFit.cover,
-                              height: height,
-                            )),
+                            Center(child: Builder(builder: (context) {
+                              // Check if cover_page exists
+                              if (!item.data().containsKey('cover_page') ||
+                                  item['cover_page'] == null) {
+                                // Fallback to a placeholder if cover_page doesn't exist
+                                return Container(
+                                  height: height,
+                                  color: Colors.grey.shade200,
+                                  child: const Center(
+                                    child: Icon(
+                                        Icons.image_not_supported_outlined,
+                                        size: 80,
+                                        color: Colors.grey),
+                                  ),
+                                );
+                              }
+
+                              // If cover_page exists, use Image.network with error handling
+                              return Image.network(
+                                item['cover_page'].toString(),
+                                fit: BoxFit.cover,
+                                height: height,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return Container(
+                                    height: height,
+                                    color: Colors.grey.shade200,
+                                    child: const Center(
+                                      child: Icon(Icons.broken_image_outlined,
+                                          size: 80, color: Colors.grey),
+                                    ),
+                                  );
+                                },
+                                loadingBuilder:
+                                    (context, child, loadingProgress) {
+                                  if (loadingProgress == null) return child;
+                                  return Container(
+                                    height: height,
+                                    color: Colors.grey.shade100,
+                                    child: Center(
+                                      child: CircularProgressIndicator(
+                                        value: loadingProgress
+                                                    .expectedTotalBytes !=
+                                                null
+                                            ? loadingProgress
+                                                    .cumulativeBytesLoaded /
+                                                loadingProgress
+                                                    .expectedTotalBytes!
+                                            : null,
+                                      ),
+                                    ),
+                                  );
+                                },
+                              );
+                            })),
                             Positioned(
                               bottom: 0,
                               left: 0,
