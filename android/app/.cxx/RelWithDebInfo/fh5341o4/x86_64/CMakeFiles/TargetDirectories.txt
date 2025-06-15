@@ -1,0 +1,2 @@
+C:/Users/User/telenants/android/app/.cxx/RelWithDebInfo/fh5341o4/x86_64/CMakeFiles/edit_cache.dir
+C:/Users/User/telenants/android/app/.cxx/RelWithDebInfo/fh5341o4/x86_64/CMakeFiles/rebuild_cache.dir

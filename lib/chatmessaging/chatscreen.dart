@@ -11,8 +11,7 @@ class ChatScreen extends StatefulWidget {
   final Details transient;
   final String? sendto;
   final String? from;
-  const ChatScreen({Key? key, required this.transient, this.sendto, this.from})
-      : super(key: key);
+  const ChatScreen({super.key, required this.transient, this.sendto, this.from});
 
   @override
   ChatScreenState createState() => ChatScreenState();

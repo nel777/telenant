@@ -2,7 +2,6 @@ import 'dart:io';
 import 'dart:async';
 
 import 'package:animated_rating_stars/animated_rating_stars.dart';
-import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -13,7 +12,6 @@ import 'package:telenant/home/components/table_calendar.dart';
 import 'package:telenant/models/chatmodel.dart';
 // import 'package:telenant/home/rate.dart';
 import 'package:telenant/models/model.dart';
-import 'package:telenant/home/homepage.dart';
 
 import '../chatmessaging/chatscreen.dart';
 

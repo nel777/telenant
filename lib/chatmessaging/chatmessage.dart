@@ -7,12 +7,11 @@ class ChatMessage extends StatelessWidget {
   final String myname;
 
   const ChatMessage(
-      {Key? key,
+      {super.key,
       required this.text,
       required this.animationController,
       required this.myname,
-      required this.email})
-      : super(key: key);
+      required this.email});
 
   @override
   Widget build(BuildContext context) {

@@ -1,4 +1,3 @@
-import 'dart:collection';
 import 'dart:io';
 
 import 'package:firebase_auth/firebase_auth.dart';
@@ -304,10 +303,10 @@ class _AddTransientState extends State<AddTransient> {
                   spacing: 8.0,
                   runSpacing: 4.0,
                   children: [
-                    _buildRuleChip('4 guest maximum', _fourGuestMax, (value) {
+                    _buildRuleChip('5 guest maximum', _fourGuestMax, (value) {
                       setState(() {
                         _fourGuestMax = value ?? false;
-                        _updateHouseRules('4 guest maximum', _fourGuestMax);
+                        _updateHouseRules('5 guest maximum', _fourGuestMax);
                       });
                     }),
                     _buildRuleChip('No pets', _noPets, (value) {

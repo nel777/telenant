@@ -149,7 +149,7 @@ class _ManageAccountState extends State<ManageAccount> {
                                             myTransient[index]['location']),
                                         leading: SizedBox(
                                           height: 150,
-                                          width: 100,
+                                          width: 20,
                                           child:
                                               imageNetwork(myTransient, index),
                                         ),
@@ -281,7 +281,7 @@ class _ManageAccountState extends State<ManageAccount> {
     );
   }
 
-  Image imageNetwork(
+ /* Image imageNetwork(
       List<QueryDocumentSnapshot<Object?>> myTransient, int index) {
     return Image.network(
       myTransient[index]['cover_page'],
@@ -302,5 +302,67 @@ class _ManageAccountState extends State<ManageAccount> {
         );
       },
     );
+  } */
+
+
+Widget imageNetwork(
+  List<QueryDocumentSnapshot<Object?>> myTransient,
+  int index,
+) {
+  // Safely get the data. It's common for QueryDocumentSnapshot to return a Map<String, dynamic>.
+  final data = myTransient[index].data() as Map<String, dynamic>?;
+
+  // Check if data is null or if 'cover_page' key is missing/null
+  if (data == null || !data.containsKey('cover_page') || data['cover_page'] == null) {
+    // Return a placeholder or an error widget if the URL is not available
+    return Container(
+      width: 500, // Keep consistent width for placeholders
+      height: 300, // Example placeholder height
+      color: Colors.grey[200],
+     // child: Icon(Icons.broken_image, size: 50, color: Colors.grey[600]),
+    );
   }
+
+  final imageUrl = data['cover_page'] as String;
+
+  return Image.network(
+    imageUrl,
+    width: 500, // Consider making this dynamic based on screen size
+    fit: BoxFit.cover, // Changed to cover, often a better default than fill
+    loadingBuilder: (BuildContext context, Widget child,
+        ImageChunkEvent? loadingProgress) {
+      if (loadingProgress == null) {
+        return child; // Image is fully loaded, show the image
+      }
+      return Center(
+        child: CircularProgressIndicator(
+          value: loadingProgress.expectedTotalBytes != null
+              ? loadingProgress.cumulativeBytesLoaded /
+                  loadingProgress.expectedTotalBytes!
+              : null, // Value can be null for indeterminate progress
+        ),
+      );
+    },
+    errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
+      // Handles errors during image loading (e.g., 404, network error)
+      return Container(
+        width: 500,
+        height: 300, // Consistent height for error placeholder
+        color: Colors.grey[300],
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.error_outline, size: 50, color: Colors.red),
+            SizedBox(height: 8),
+            Text('Failed to load image', style: TextStyle(color: Colors.red)),
+          ],
+        ),
+      );
+    },
+  );
+}
+
+
+
+
 }

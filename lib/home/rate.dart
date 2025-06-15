@@ -121,9 +121,9 @@ class _RateServiceState extends State<RateService> {
                 throw ex.message.toString();
               }
             },
-            child: const Text('Submit'),
             style: ElevatedButton.styleFrom(
                 fixedSize: const Size(200, 45), elevation: 5.0),
+            child: const Text('Submit'),
           )
         ],
       ),

@@ -10,7 +10,6 @@ import 'package:telenant/home/admin/addtransient.dart';
 import 'package:telenant/home/components/near_me_widgets.dart';
 import 'package:telenant/home/filtered.dart';
 import 'package:telenant/home/searchbox.dart';
-import 'package:telenant/home/transients_list.dart';
 import 'package:telenant/utils/filter_transients.dart';
 import 'package:textfield_search/textfield_search.dart';
 import 'dart:async';
@@ -478,73 +477,102 @@ class _HomePageState extends State<HomePage> {
             future: FirebaseFirestoreService.instance
                 .getUserDetails(FirebaseAuth.instance.currentUser!.uid),
             builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                Map<String, dynamic> data =
-                    snapshot.data!.data() as Map<String, dynamic>;
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Card(
-                      elevation: 0,
-                      color:
-                          colorScheme.surfaceContainerHighest.withOpacity(0.3),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          children: [
-                            ListTile(
-                              leading: CircleAvatar(
-                                backgroundColor: colorScheme.primaryContainer,
-                                child: Icon(
-                                  Icons.person_outline_rounded,
-                                  color: colorScheme.onPrimaryContainer,
-                                ),
-                              ),
-                              title: Text(
-                                'ID Number',
-                                style: textTheme.bodySmall?.copyWith(
-                                  color: colorScheme.onSurfaceVariant,
-                                ),
-                              ),
-                              subtitle: Text(
-                                data['idNumber'] ?? 'Not specified',
-                                style: textTheme.titleMedium,
-                              ),
-                            ),
-                            const Divider(),
-                            ListTile(
-                              leading: CircleAvatar(
-                                backgroundColor: colorScheme.primaryContainer,
-                                child: Icon(
-                                  Icons.email_outlined,
-                                  color: colorScheme.onPrimaryContainer,
-                                ),
-                              ),
-                              title: Text(
-                                'Email',
-                                style: textTheme.bodySmall?.copyWith(
-                                  color: colorScheme.onSurfaceVariant,
-                                ),
-                              ),
-                              subtitle: Text(
-                                data['email'] ?? 'Not specified',
-                                style: textTheme.titleMedium,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+              // Assuming this code is inside a Builder or StreamBuilder/FutureBuilder's builder method
+// and `snapshot` is the AsyncSnapshot<DocumentSnapshot> (or similar type).
+
+// You also need access to colorScheme and textTheme, assuming they are defined elsewhere in your widget
+// For example:
+// final ColorScheme colorScheme = Theme.of(context).colorScheme;
+// final TextTheme textTheme = Theme.of(context).textTheme;
+
+
+if (snapshot.hasData) {
+  // Check if snapshot.data is null (which it shouldn't be if hasData is true,
+  // but defensive programming is good) AND if its .data() method returns a Map.
+  // snapshot.data itself is a DocumentSnapshot or similar.
+  // We need to check the result of snapshot.data!.data()
+  final dynamic rawData = snapshot.data!.data(); // Get the raw data from the DocumentSnapshot
+
+  // Ensure rawData is not null AND is actually a Map<String, dynamic>
+  if (rawData != null && rawData is Map<String, dynamic>) {
+    Map<String, dynamic> data = rawData; // Safely assign after checking its type
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Card(
+          elevation: 0,
+          color: colorScheme.surfaceContainerHighest.withOpacity(0.3),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                ListTile(
+                  leading: CircleAvatar(
+                    backgroundColor: colorScheme.primaryContainer,
+                    child: Icon(
+                      Icons.person_outline_rounded,
+                      color: colorScheme.onPrimaryContainer,
                     ),
-                  ],
-                );
-              } else if (snapshot.hasError) {
-                return Center(child: Text('Error: ${snapshot.error}'));
-              } else {
-                return const Center(child: CircularProgressIndicator());
-              }
+                  ),
+                  title: Text(
+                    'ID Number',
+                    style: textTheme.bodySmall?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  subtitle: Text(
+                    // Use null-aware operator for map access as well
+                    // This prevents errors if 'idNumber' key is missing
+                    data['idNumber']?.toString() ?? 'Not specified',
+                    style: textTheme.titleMedium,
+                  ),
+                ),
+                const Divider(),
+                ListTile(
+                  leading: CircleAvatar(
+                    backgroundColor: colorScheme.primaryContainer,
+                    child: Icon(
+                      Icons.email_outlined,
+                      color: colorScheme.onPrimaryContainer,
+                    ),
+                  ),
+                  title: Text(
+                    'Email',
+                    style: textTheme.bodySmall?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  subtitle: Text(
+                    // Use null-aware operator for map access as well
+                    // This prevents errors if 'email' key is missing
+                    data['email']?.toString() ?? 'Not specified',
+                    style: textTheme.titleMedium,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  } else {
+    // This block handles cases where snapshot.hasData is true,
+    // but the actual data payload (from .data()) is null or not a Map.
+    print('Warning: Document data is null or not in expected Map format.');
+    return Center(child: Text('Document data not found or is empty.'));
+    // You can return a different widget here, e.g., a message indicating no data
+  }
+} else if (snapshot.hasError) {
+  // Handle error state
+  return Center(child: Text('Error: ${snapshot.error}'));
+} else {
+  // Handle loading state (no data yet)
+  return const Center(child: CircularProgressIndicator());
+}
             },
           ),
           const SizedBox(height: 32),
