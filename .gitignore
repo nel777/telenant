@@ -9,7 +9,7 @@
 .history
 .svn/
 migrate_working_dir/
-
+android/gradle/wrapper/Oracle_JDK-24/
 
 # IntelliJ related
 *.iml
