@@ -5,6 +5,7 @@ gradle-wrapper.jar
 /gradlew.bat
 /local.properties
 GeneratedPluginRegistrant.java
+gradle/wrapper/Oracle_JDK-24/
 
 
 # Remember to never publicly share your keystore.
