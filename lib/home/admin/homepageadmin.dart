@@ -192,6 +192,14 @@ class _ViewTransientState extends State<ViewTransient> {
                         print(
                             'Error processing price_range for ${data['name']}: $e');
                       }
+                    } else if (data.containsKey('priceRange') &&
+                        data['priceRange'] != null) {
+                      try {
+                        priceRange = data['priceRange'] as Map<String, dynamic>;
+                      } catch (e) {
+                        print(
+                            'Error processing priceRange for ${data['name']}: $e');
+                      }
                     }
 
                     // Safely handle lists
@@ -284,8 +292,12 @@ class _ViewTransientState extends State<ViewTransient> {
                           ? data['managedBy']?.toString() ?? ''
                           : '',
                       priceRange: PriceRange(
-                        min: priceRange['min'] ?? 0,
-                        max: priceRange['max'] ?? 0,
+                        min: priceRange['min'] != null
+                            ? int.tryParse(priceRange['min'].toString()) ?? 0
+                            : 0,
+                        max: priceRange['max'] != null
+                            ? int.tryParse(priceRange['max'].toString()) ?? 0
+                            : 0,
                       ),
                       coverPage: coverPage,
                       gallery: gallery,
@@ -362,6 +374,7 @@ class _ViewTransientState extends State<ViewTransient> {
               itemCount: listOfTransients.length,
               itemBuilder: (context, index) {
                 final property = listOfTransients[index];
+                print('property: ${property.priceRange?.min}');
                 return _buildPropertyCard(context, property);
               },
             );
@@ -410,6 +423,7 @@ class _ViewTransientState extends State<ViewTransient> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Text('₱${property.priceRange}'),
             // Image with overlay
             Stack(
               children: [
